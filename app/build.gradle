@@ -28,5 +28,6 @@ dependencies {
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.code.gson:gson:2.3'
+    compile 'commons-codec:commons-codec:1.10'
     testCompile 'junit:junit:4.12'
 }

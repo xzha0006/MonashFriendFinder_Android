@@ -16,7 +16,7 @@ public class Friendship {
      * Constructor
      */
     public Friendship(){
-        
+
     }
 
     /**

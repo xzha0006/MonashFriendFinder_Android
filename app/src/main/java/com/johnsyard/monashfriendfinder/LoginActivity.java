@@ -17,15 +17,16 @@ public class LoginActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        Button loginBtn = (Button) findViewById(R.id.bt_login);
-        loginBtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-            }
-        });
+//        setContentView(R.layout.activity_login);
+        setContentView(R.layout.fragment_subscription);
+//        Button loginBtn = (Button) findViewById(R.id.bt_login);
+//        loginBtn.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View view) {
+//                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+//                startActivity(intent);
+//            }
+//        });
     }
 }
 

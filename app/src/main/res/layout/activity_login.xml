@@ -12,7 +12,7 @@
         android:layout_alignStart="@+id/tv_user_name"
         android:layout_below="@+id/tv_user_name"
         android:layout_marginTop="23dp"
-        android:text="Passowrd:"
+        android:text="@string/tv_password"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="25dp"
         android:layout_marginTop="143dp"
-        android:text="User Name:"
+        android:text="@string/tv_username"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
@@ -31,6 +31,7 @@
         android:id="@+id/et_user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:hint="@string/tv_usernamehint"
         android:ems="8"
         android:inputType="textPersonName"
         android:layout_alignBaseline="@+id/tv_user_name"
@@ -56,7 +57,7 @@
         android:layout_below="@+id/et_password"
         android:layout_marginRight="45dp"
         android:layout_marginTop="16dp"
-        android:text="Login" />
+        android:text="@string/bt_login" />
 
     <Button
         android:id="@+id/bt_register"
@@ -64,7 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="45dp"
-        android:text="Register"
+        android:text="@string/bt_rigester"
         android:layout_alignBaseline="@+id/bt_login"
         android:layout_alignBottom="@+id/bt_login" />
 </RelativeLayout>

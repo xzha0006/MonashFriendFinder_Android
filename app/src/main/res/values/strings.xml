@@ -5,4 +5,22 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+
+    <string name="tv_username">User Name:</string>
+    <string name="tv_usernamehint">your email address</string>
+    <string name="tv_password">Password:</string>
+    <string name="bt_rigester">Rigester</string>
+    <string name="bt_login">Login</string>
+
+    <string-array name="course_array">
+        <item>MIT</item>
+        <item>MDS</item>
+        <item>MBIS</item>
+        <item>MNS</item>
+    </string-array>
+
+    <string-array name="studymode_array">
+        <item>Full-time</item>
+        <item>Part-time</item>
+    </string-array>
 </resources>
