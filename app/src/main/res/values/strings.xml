@@ -9,8 +9,12 @@
     <string name="tv_username">User Name:</string>
     <string name="tv_usernamehint">your email address</string>
     <string name="tv_password">Password:</string>
+
+    <string name="default_date">1960/01/01</string>
     <string name="bt_rigester">Rigester</string>
     <string name="bt_login">Login</string>
+    <string name="bt_set_date">Set date</string>
+
 
     <string-array name="course_array">
         <item>MIT</item>
@@ -22,5 +26,46 @@
     <string-array name="studymode_array">
         <item>Full-time</item>
         <item>Part-time</item>
+    </string-array>
+
+    <string-array name="nation_array">
+        <item>China</item>
+        <item>Australia</item>
+        <item>India</item>
+        <item>Pakistan</item>
+        <item>Russia</item>
+        <item>France</item>
+        <item>Germany</item>
+        <item>America</item>
+        <item>United Kingdom</item>
+    </string-array>
+
+    <string-array name="language_array">
+        <item>Mandarin</item>
+        <item>English</item>
+        <item>Spanish</item>
+        <item>French</item>
+        <item>Russian</item>
+        <item>German</item>
+        <item>Arabic</item>
+    </string-array>
+
+    <string-array name="favorite_sport_array">
+        <item>Basketball</item>
+        <item>Swimming</item>
+        <item>Fitness</item>
+        <item>Running</item>
+        <item>Netball</item>
+        <item>Rugby</item>
+        <item>Soccer</item>
+    </string-array>
+
+    <string-array name="favorite_unit_array">
+        <item>FIT5046 Mobile</item>
+        <item>FIT5139 Parallel Programming</item>
+        <item>FIT9031 Java</item>
+        <item>FIT9032 Database</item>
+        <item>FIT9034 Operating System</item>
+        <item>FIT9035 Data Communication</item>
     </string-array>
 </resources>
