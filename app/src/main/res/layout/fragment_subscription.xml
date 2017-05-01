@@ -119,7 +119,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="16dp"
-        android:text="Date of Birth"
+        android:text="Date of Birth:"
         android:textAppearance="?android:attr/textAppearanceMedium"/>
 
     <LinearLayout
@@ -129,14 +129,14 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/datepicker_dob"
+            android:id="@+id/tv_datepicker_dob"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/default_date" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/bt_setdate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -272,10 +272,36 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <EditText
-        android:id="@+id/ev_favorite_movie"
+        android:id="@+id/et_favorite_movie"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName" />
-    </LinearLayout>
+        android:ems="10" />
+
+    <TextView
+        android:id="@+id/tv_job"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp"
+        android:text="Current Job:"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/et_job"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10" />
+
+    <Button
+        android:id="@+id/bt_submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="18dp"
+        android:text="@string/bt_submit" />
+
+    <Button
+        android:id="@+id/bt_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/bt_cancel" />
+</LinearLayout>
 </ScrollView>
