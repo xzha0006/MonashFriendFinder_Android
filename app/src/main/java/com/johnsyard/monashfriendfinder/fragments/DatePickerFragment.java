@@ -35,6 +35,6 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
     }
     public void populateSetDate(int year, int month, int day) {
         //set the date time into text view
-        ((TextView) getActivity().findViewById(R.id.tv_datepicker_dob)).setText(month + "/" + day + "/" + year);
+        ((TextView) getActivity().findViewById(R.id.tv_datepicker_dob)).setText(month + "-" + day + "-" + year);
     }
 }

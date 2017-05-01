@@ -1,13 +1,19 @@
 package com.johnsyard.monashfriendfinder.fragments;
 
 import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.johnsyard.monashfriendfinder.R;
+import com.johnsyard.monashfriendfinder.RestClient;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by xuanzhang on 1/05/2017.
@@ -15,11 +21,32 @@ import com.johnsyard.monashfriendfinder.R;
 
 public class HomeFragment extends Fragment {
     View vHome;
+    TextView tvTemp;
+    TextView tvTime;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         vHome = inflater.inflate(R.layout.fragment_home, container, false);
+        tvTemp = (TextView) vHome.findViewById(R.id.tv_temperature);
+        tvTime = (TextView) vHome.findViewById(R.id.tv_time);
+        //should be changed
+        String latitude = "-37.8";
+        String longitude = "145";
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateString = sdf.format(new Date());
+        tvTime.setText("Login time: " + dateString);
+        new AsyncTask<String, Void, String>(){
+            @Override
+            protected String doInBackground(String... strings) {
+                return RestClient.getTemperatureByLocation(strings[0], strings[1]);
+            }
+            @Override
+            protected void onPostExecute(String temperature) {
+                tvTemp.setText("Today's temperature is " + temperature);
+            }
+        }.execute(latitude, longitude);
         return vHome;
     }
 }

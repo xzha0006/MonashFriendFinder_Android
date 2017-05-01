@@ -64,9 +64,12 @@ public class LoginFragment extends Fragment {
                     @Override
                     protected void onPostExecute(Boolean response) {
                         if (response) {
-                            //if true, go to home page
+                            //if true, clear the data and go to home page
+                            Toast.makeText(getActivity().getApplicationContext(), "Successfully!", Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(getActivity(), MainActivity.class);
                             startActivity(intent);
+                            etUserName.setText("");
+                            etPassword.setText("");
                         }
                         //if false, clear the edittexts
                         else {
