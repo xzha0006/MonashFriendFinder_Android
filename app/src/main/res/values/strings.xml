@@ -6,6 +6,11 @@
 
     <string name="action_settings">Settings</string>
 
+    <string name="tv_options">Options</string>
+    <string name="tv_temperature">Today\'s temperature is </string>
+    <string name="tv_hi">Hi, </string>
+    <string name="tv_welcome">Welcome to MonashFriendFinder!</string>
+    <string name="tv_icon">Find Your Friends Here!</string>
     <string name="tv_username">User Name:</string>
     <string name="tv_usernamehint">your email address</string>
     <string name="tv_password">Password:</string>
