@@ -2,6 +2,7 @@ package com.johnsyard.monashfriendfinder;
 
 import android.util.Log;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -20,12 +21,104 @@ import java.util.Scanner;
  */
 
 public class RestClient {
-    private static final String BASE_URI = "http://100.103.98.198:8080/MonashFriendFinder/webresources/entities.";
+    private static final String BASE_URI = "http://118.139.5.84:8080/MonashFriendFinder/webresources/entities.";
     private static final String WEATHER_API = "http://api.openweathermap.org/data/2.5/weather?";
 
 //    public static void main(String[] args){
 //        System.out.println("test: " + loginCheck("js@monash.edu", "JS12345"));
 //    }
+
+    /**
+     * This method is used to match student.
+     * @param studentId
+     */
+    public static JsonArray findCurrentFriends(int studentId) {
+        //initialise
+        //We use two requests here. Because of the rule of preventing reverse friendship.
+        HttpURLConnection conn = null;
+        HttpURLConnection conn2 = null;
+        String url = "";
+        String url2 = "";
+        String textResult = "";
+        String textResult2 = "";
+        JsonArray friendsArray = new JsonArray();
+        JsonArray friendshipsArray = null;
+        JsonArray friendshipsArray2 = null;
+        final String methodPath = "friendship/findByStudOneId/";
+        final String methodPath2 = "friendship/findByStudTwoId/";
+
+        try {
+            url = BASE_URI + methodPath + studentId;
+            url2 = BASE_URI + methodPath2 + studentId;
+            //open the connection
+            conn = setConnection(url, "GET", false);
+            conn2 = setConnection(url2, "GET", false);
+            Scanner inStream = new Scanner(conn.getInputStream());
+            Scanner inStream2 = new Scanner(conn2.getInputStream());
+            //read the input stream and store it as string
+            while (inStream.hasNextLine()) {
+                textResult += inStream.nextLine();
+            }
+            friendshipsArray = new JsonParser().parse(textResult).getAsJsonArray();
+
+            while (inStream2.hasNextLine()) {
+                textResult2 += inStream2.nextLine();
+            }
+            friendshipsArray2 = new JsonParser().parse(textResult2).getAsJsonArray();
+
+            if (friendshipsArray.size() > 0){
+                for (int i = 0; i < friendshipsArray.size(); i++){
+                    JsonObject friendship = friendshipsArray.get(i).getAsJsonObject();
+                    friendsArray.add(friendship.get("studentTwoId").getAsJsonObject());
+                }
+            }
+
+            if (friendshipsArray2.size() > 0){
+                for (int j = 0; j < friendshipsArray2.size(); j++){
+                    JsonObject friendship = friendshipsArray2.get(j).getAsJsonObject();
+                    friendsArray.add(friendship.get("studentOneId").getAsJsonObject());
+                }
+            }
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+        }
+        return friendsArray;
+    }
+
+    /**
+     * This method is used to match student.
+     * @param studentId
+     * @param keywords
+     */
+    public static JsonArray matchFriendsByAnyKeywords(int studentId, String keywords) {
+        //initialise
+        HttpURLConnection conn = null;
+        String url = "";
+        String textResult = "";
+        JsonArray friendsArray = null;
+        final String methodPath = "profile/matchFriendsByAnyKeywords/";
+
+        try {
+            url = BASE_URI + methodPath + studentId + keywords;
+            //open the connection
+            conn = setConnection(url, "GET", false);
+            Scanner inStream = new Scanner(conn.getInputStream());
+            //read the input stream and store it as string
+            while (inStream.hasNextLine()) {
+                textResult += inStream.nextLine();
+            }
+            friendsArray = new JsonParser().parse(textResult).getAsJsonArray();
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+        }
+        return friendsArray;
+    }
 
     /**
      * This method is used to call the OpenWeatherMap API to get the temperature.
@@ -34,7 +127,6 @@ public class RestClient {
      * @param longitude
      * @return
      */
-
     public static String getTemperatureByLocation(String latitude, String longitude) {
         final String apiKey = "3246fde5301a8a80174dfd6588498359";
         double temperature = 0;
@@ -49,7 +141,7 @@ public class RestClient {
             conn = setConnection(url, "GET", false);
             //Read the response
             Scanner inStream = new Scanner(conn.getInputStream());
-            //read the input steream and store it as string
+            //read the input stream and store it as string
             while (inStream.hasNextLine()) {
                 textResult += inStream.nextLine();
             }
@@ -94,13 +186,14 @@ public class RestClient {
     /**
      * This method is used for login checking
      */
-    public static boolean loginCheck(String userName, String password){
+    public static JsonObject loginCheck(String userName, String password){
         boolean result = false;
         String hashPassword = new String(Hex.encodeHex(DigestUtils.md5(password)));
         HttpURLConnection conn = null;
         Scanner inStream = null;
         final String methodPath = "profile/loginCheck";
         String textResult = "";
+        JsonObject responseJson = null;
         try {
 
             conn = setConnection(BASE_URI + methodPath, "POST", true);
@@ -122,11 +215,11 @@ public class RestClient {
                 textResult += inStream.nextLine();
             }
             System.out.println(textResult);
-            JsonObject responseJson = new JsonParser().parse(textResult).getAsJsonObject();
-            System.out.println(responseJson.get("Info").getAsString());
-            result = Boolean.parseBoolean(responseJson.get("response").getAsString());
-            System.out.println("new: " + responseJson.get("response").toString());
-            System.out.println("new1: " + result);
+            responseJson = new JsonParser().parse(textResult).getAsJsonObject();
+//            System.out.println(responseJson.get("Info").getAsString());
+//            result = Boolean.parseBoolean(responseJson.get("response").getAsString());
+//            System.out.println("new: " + responseJson.get("response").toString());
+//            System.out.println("new1: " + result);
 //            Log.i("Info", new Integer(conn.getResponseCode()).toString());
         } catch (Exception e) {
             e.printStackTrace();
@@ -134,14 +227,14 @@ public class RestClient {
             inStream.close();
             conn.disconnect();
         }
-        return result;
+        return responseJson;
     }
 
     /**
      * This method is used to set http connection
      * @param sUrl
      * @param methodType
-     * @param doOutput
+     * @param doOutput if need to write output
      * @return
      */
     private static HttpURLConnection setConnection(String sUrl, String methodType, boolean doOutput) {

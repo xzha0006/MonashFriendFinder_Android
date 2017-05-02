@@ -64,7 +64,6 @@ public class RegisterFragment extends Fragment {
     private EditText etCurrentJob;
 
 
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -84,14 +83,14 @@ public class RegisterFragment extends Fragment {
         rbFemale = (RadioButton) vRegister.findViewById(R.id.rbt_female);
         sCourse = (Spinner) vRegister.findViewById(R.id.s_course);
         sStudyMode = (Spinner) vRegister.findViewById(R.id.s_studymode);
-        etAddress  = (EditText) vRegister.findViewById(R.id.et_address);
-        etSuburb  = (EditText) vRegister.findViewById(R.id.et_suburb);
-        sNationality  = (Spinner) vRegister.findViewById(R.id.s_nation);
-        sNativeLanguage  = (Spinner) vRegister.findViewById(R.id.s_language);
-        sFavouriteSport  = (Spinner) vRegister.findViewById(R.id.s_favorite_sport);
-        etFavouriteMovie  = (EditText) vRegister.findViewById(R.id.et_favorite_movie);
-        sFavouriteUnit  = (Spinner) vRegister.findViewById(R.id.s_favorite_unit);
-        etCurrentJob  = (EditText) vRegister.findViewById(R.id.et_job);
+        etAddress = (EditText) vRegister.findViewById(R.id.et_address);
+        etSuburb = (EditText) vRegister.findViewById(R.id.et_suburb);
+        sNationality = (Spinner) vRegister.findViewById(R.id.s_nation);
+        sNativeLanguage = (Spinner) vRegister.findViewById(R.id.s_language);
+        sFavouriteSport = (Spinner) vRegister.findViewById(R.id.s_favorite_sport);
+        etFavouriteMovie = (EditText) vRegister.findViewById(R.id.et_favorite_movie);
+        sFavouriteUnit = (Spinner) vRegister.findViewById(R.id.s_favorite_unit);
+        etCurrentJob = (EditText) vRegister.findViewById(R.id.et_job);
 
 
         //date picker for selecting date of birth
@@ -111,7 +110,7 @@ public class RegisterFragment extends Fragment {
                 String password = etPassword.getText().toString();
                 String passwordAgain = etPasswordAgain.getText().toString();
                 //get current date time
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String dateString = sdf.format(new Date());
                 String subscriptionDatetime = dateString;
 
@@ -207,7 +206,11 @@ public class RegisterFragment extends Fragment {
                 SharedPreferences.Editor eMyProfile = spMyProfile.edit();
                 eMyProfile.putString("myProfile", jsMyProfile);
                 eMyProfile.apply();
-                new AsyncTask<String, Void, String>(){
+                new AsyncTask<String, Void, String>() {
+                    @Override
+                    protected void onPreExecute() {
+                        Toast.makeText(getActivity().getApplicationContext(), "Your profile is submitting...", Toast.LENGTH_SHORT).show();
+                    }
 
                     @Override
                     protected String doInBackground(String... strings) {
@@ -220,7 +223,6 @@ public class RegisterFragment extends Fragment {
                         Toast.makeText(getActivity().getApplicationContext(), response, Toast.LENGTH_LONG).show();
                     }
                 }.execute(jsMyProfile);
-                Toast.makeText(getActivity().getApplicationContext(), "Your profile is submitting...", Toast.LENGTH_SHORT).show();
             }
         });
 

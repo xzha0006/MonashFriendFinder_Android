@@ -13,12 +13,19 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <TextView
-        android:id="@+id/tv_options"
+        android:id="@+id/tv_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:text="@string/tv_options"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        android:text="@string/tv_welcome"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    <TextView
+        android:id="@+id/tv_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/nav_header_vertical_spacing"
+        android:text="@string/tv_menu"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 
 

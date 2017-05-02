@@ -18,7 +18,7 @@ import com.johnsyard.monashfriendfinder.R;
  */
 
 public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
-
+    DatePickerDialog datePickerDialog;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         //create a calendar
@@ -26,7 +26,11 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         int yy = calendar.get(Calendar.YEAR);
         int mm = calendar.get(Calendar.MONTH);
         int dd = calendar.get(Calendar.DAY_OF_MONTH);
-        return new DatePickerDialog(getActivity(), this, yy, mm, dd);
+        datePickerDialog = new DatePickerDialog(getActivity(), this, yy, mm, dd);
+        datePickerDialog.getDatePicker().setMaxDate(Calendar.getInstance().getTime().getTime());
+        //set the start date to 57 years ago
+        datePickerDialog.getDatePicker().setMinDate(Calendar.getInstance().getTime().getTime() - 31536000 * 57 * 1000L);
+        return datePickerDialog;
     }
 
     @Override
@@ -35,6 +39,6 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
     }
     public void populateSetDate(int year, int month, int day) {
         //set the date time into text view
-        ((TextView) getActivity().findViewById(R.id.tv_datepicker_dob)).setText(month + "-" + day + "-" + year);
+        ((TextView) getActivity().findViewById(R.id.tv_datepicker_dob)).setText(year + "-" + month + "-" + day);
     }
 }

@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.johnsyard.monashfriendfinder.fragments.FriendFragment;
 import com.johnsyard.monashfriendfinder.fragments.HomeFragment;
 import com.johnsyard.monashfriendfinder.fragments.SearchFragment;
 
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_search) {
             nextFragment = new SearchFragment();
         } else if (id == R.id.nav_friend) {
-
+            nextFragment = new FriendFragment();
         } else if (id == R.id.nav_update) {
 
         } else if (id == R.id.nav_logout) {

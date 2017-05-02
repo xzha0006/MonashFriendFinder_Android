@@ -6,7 +6,7 @@
 
     <string name="action_settings">Settings</string>
 
-    <string name="tv_options">Options</string>
+    <string name="tv_menu">Menu:</string>
     <string name="tv_temperature">Today\'s temperature is </string>
     <string name="tv_hi">Hi, </string>
     <string name="tv_welcome">Welcome to MonashFriendFinder!</string>
@@ -15,12 +15,13 @@
     <string name="tv_usernamehint">your email address</string>
     <string name="tv_password">Password:</string>
 
-    <string name="default_date">1960/01/01</string>
-    <string name="bt_rigester">Rigester</string>
+    <string name="default_date">1960-01-01</string>
+    <string name="bt_rigester">Register</string>
     <string name="bt_login">Login</string>
     <string name="bt_set_date">Set date</string>
     <string name="bt_cancel">Cancel</string>
     <string name="bt_submit">Submit</string>
+    <string name="bt_search">Search</string>
 
 
     <string-array name="course_array">

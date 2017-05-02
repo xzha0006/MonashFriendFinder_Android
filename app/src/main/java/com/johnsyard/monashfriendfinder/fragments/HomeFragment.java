@@ -44,7 +44,7 @@ public class HomeFragment extends Fragment {
             }
             @Override
             protected void onPostExecute(String temperature) {
-                tvTemp.setText("Today's temperature is " + temperature);
+                tvTemp.setText("Today's temperature is " + temperature + "°C");
             }
         }.execute(latitude, longitude);
         return vHome;

@@ -3,7 +3,9 @@ package com.johnsyard.monashfriendfinder.fragments;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,6 +16,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.johnsyard.monashfriendfinder.LoginActivity;
 import com.johnsyard.monashfriendfinder.MainActivity;
 import com.johnsyard.monashfriendfinder.R;
@@ -55,17 +59,30 @@ public class LoginFragment extends Fragment {
                     return;
                 }
                 Boolean result;
-                new AsyncTask<String, Void, Boolean>(){
+                new AsyncTask<String, Void, JsonObject>(){
+                    //
                     @Override
-                    protected Boolean doInBackground(String... strings) {
-                        Boolean result = RestClient.loginCheck(strings[0], strings[1]);
+                    protected void onPreExecute(){
+                        Toast.makeText(getActivity().getApplicationContext(), "Processing...", Toast.LENGTH_SHORT).show();
+                    }
+                    @Override
+                    protected JsonObject doInBackground(String... strings) {
+                        JsonObject result = RestClient.loginCheck(strings[0], strings[1]);
                         return result;
                     }
                     @Override
-                    protected void onPostExecute(Boolean response) {
-                        if (response) {
-                            //if true, clear the data and go to home page
-                            Toast.makeText(getActivity().getApplicationContext(), "Successfully!", Toast.LENGTH_SHORT).show();
+                    protected void onPostExecute(JsonObject response) {
+                        boolean isChecked = Boolean.parseBoolean(response.get("response").getAsString());
+                        if (isChecked) {
+                            //get user's student id
+                            int myStudentId = response.get("studentId").getAsInt();
+                            //store the id in local
+                            SharedPreferences sp = getActivity().getSharedPreferences("myProfile", Context.MODE_PRIVATE);
+                            SharedPreferences.Editor eMyProfile = sp.edit();
+                            eMyProfile.putInt("myStudentId", myStudentId);
+                            eMyProfile.apply();
+                            //clear the data and go to home page
+                            Toast.makeText(getActivity().getApplicationContext(), "Login Successfully!", Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(getActivity(), MainActivity.class);
                             startActivity(intent);
                             etUserName.setText("");
@@ -91,6 +108,7 @@ public class LoginFragment extends Fragment {
                 fragmentManager.beginTransaction().replace(R.id.content_frame, new RegisterFragment()).commit();
             }
         });
+
         return vLogin;
     }
 }
