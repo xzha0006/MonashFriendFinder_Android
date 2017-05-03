@@ -35,16 +35,16 @@ import static android.R.attr.mode;
  */
 
 public class SearchFragment extends Fragment implements MultiSelectionSpinner.OnMultipleItemsSelectedListener {
-    View vSearch;
-    Button btSearch;
-    MultiSelectionSpinner multiSelectionSpinner;
-    ListView lvResults;
-    TextView tvTitle;
-    Button btViewInMap;
-    Button btAddFriend;
-    String keywords;
-    int studentId;
-    int KEYWORD_NUM = 9;
+    private View vSearch;
+    private Button btSearch;
+    private MultiSelectionSpinner multiSelectionSpinner;
+    private ListView lvResults;
+    private TextView tvTitle;
+    private Button btViewInMap;
+    private Button btAddFriend;
+    private String keywords;
+    private int studentId;
+    private int KEYWORD_NUM = 9;
 
     @Nullable
     @Override

@@ -1,6 +1,7 @@
 package com.johnsyard.monashfriendfinder.fragments;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -32,11 +33,12 @@ import java.util.List;
  */
 
 public class FriendFragment extends Fragment {
-    View vFriend;
-    ListView lvFriends;
-    TextView tvTitle;
-    Button btViewInMap;
-    Button btDelete;
+    private View vFriend;
+    private ListView lvFriends;
+    private TextView tvTitle;
+    private Button btViewInMap;
+    private Button btDelete;
+
 
     int studentId;
     ExpandAdapter adapter = null;
@@ -45,6 +47,9 @@ public class FriendFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        //??????????
+        super.onCreateView(inflater, container, savedInstanceState);
+
         vFriend = inflater.inflate(R.layout.fragment_friend, container, false);
         lvFriends = (ListView) vFriend.findViewById(R.id.lt_friends);
         tvTitle = (TextView) vFriend.findViewById(R.id.tv_title);
@@ -58,20 +63,74 @@ public class FriendFragment extends Fragment {
 
         studentId = profileJson.get("studentId").getAsInt();
 
+        this.getFriends();
+
+        //delete friends
+        btDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                HashMap<Integer, Boolean> isSelected = adapter.getIsSelected();
+                ArrayList<HashMap<String, String>> dataList = adapter.getList();
+                String ids = "";
+                int dataSize = dataList.size();
+                ArrayList<Integer> deletedItems = new ArrayList<Integer>();
+                if (dataList.size() != 0){
+                    for (int i = 0; i < dataSize; i++){
+                        if (isSelected.get(i)){
+                            String studentIdContent = dataList.get(i).get("studentId");
+                            String studentIdStr = studentIdContent.substring(studentIdContent.indexOf(":") + 1).trim();
+                            ids += studentIdStr + " ";
+                            deletedItems.add(i);
+                            isSelected.put(i, false);
+                        }
+                    }
+
+                    for (int j = deletedItems.size() - 1; j >= 0; j--){
+                        dataList.remove(j);
+                    }
+                    //tell adapter to change the data
+                    adapter.notifyDataSetChanged();
+                    //remove the extra spaces
+                    ids = ids.trim();
+                    //refresh the friend page.
+                    getFriends();
+                    Toast.makeText(getActivity().getApplicationContext(), ids, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        //active the map
+        btViewInMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentManager fragmentManager = getFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
+            }
+        });
+
+        return vFriend;
+    }
+
+    /**
+     * This method is used to get friends data from the database.
+     */
+    private void getFriends(){
         new AsyncTask<String, Void, JsonArray>() {
             @Override
             protected JsonArray doInBackground(String... strings) {
                 JsonArray friendsArray = null;
-                if (studentId < 0){
-                    Toast.makeText(getActivity().getApplicationContext(), "There is an error with user's studentId.", Toast.LENGTH_LONG).show();
-                }else{
-                    friendsArray = RestClient.findCurrentFriends(studentId);
-                }
+                friendsArray = RestClient.findCurrentFriends(studentId);
                 return friendsArray;
             }
 
             @Override
             protected void onPostExecute(JsonArray friendsArray) {
+                //store the data into shardpreference
+                SharedPreferences sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+                SharedPreferences.Editor spEdit = sp.edit();
+                spEdit.putString("currentFriends", friendsArray.toString());
+                spEdit.apply();
+
                 if (friendsArray.size() != 0){
                     //has matched results
                     ArrayList<HashMap<String, String>> data = formatData(friendsArray);
@@ -86,42 +145,7 @@ public class FriendFragment extends Fragment {
                 }
             }
         }.execute();
-
-        //delete friends
-        btDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                HashMap<Integer, Boolean> isSelected = adapter.getIsSelected();
-                ArrayList<HashMap<String, String>> dataList = adapter.getList();
-                String ids = "";
-                ArrayList<Integer> deletedItems = new ArrayList<Integer>();
-                if (dataList.size() != 0){
-                    for (int i = 0; i < isSelected.size(); i++){
-                        if (isSelected.get(i)){
-                            String studentIdContent = dataList.get(i).get("studentId");
-                            String studentIdStr = studentIdContent.substring(studentIdContent.indexOf(":")).trim();
-                            ids += studentIdStr + " ";
-                            deletedItems.add(i);
-                            isSelected.put(i, false);
-                        }
-                    }
-
-                    for (int j : deletedItems){
-                        dataList.remove(j);
-                    }
-                    //tell adapter to change the data
-                    adapter.notifyDataSetChanged();
-                    //remove the extra spaces
-                    ids = ids.trim();
-                    Toast.makeText(getActivity().getApplicationContext(), ids, Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-
-
-        return vFriend;
     }
-
     /**
      * This method is for adapter data formatting
      * @param friendsArray

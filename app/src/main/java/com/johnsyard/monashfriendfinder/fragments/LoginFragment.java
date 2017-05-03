@@ -30,10 +30,10 @@ import com.johnsyard.monashfriendfinder.RestClient;
 
 public class LoginFragment extends Fragment {
     private View vLogin;
-    Button btLogin;
-    Button btRegister;
-    EditText etUserName;
-    EditText etPassword;
+    private Button btLogin;
+    private Button btRegister;
+    private EditText etUserName;
+    private EditText etPassword;
 
     @Nullable
     @Override

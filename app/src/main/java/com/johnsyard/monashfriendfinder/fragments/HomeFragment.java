@@ -24,10 +24,10 @@ import java.util.Date;
  */
 
 public class HomeFragment extends Fragment {
-    View vHome;
-    TextView tvTemp;
-    TextView tvTime;
-    TextView tvName;
+    private View vHome;
+    private TextView tvTemp;
+    private TextView tvTime;
+    private TextView tvName;
 
     @Nullable
     @Override

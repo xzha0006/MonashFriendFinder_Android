@@ -18,7 +18,7 @@ import com.johnsyard.monashfriendfinder.R;
  */
 
 public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
-    DatePickerDialog datePickerDialog;
+    private DatePickerDialog datePickerDialog;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         //create a calendar

@@ -29,7 +29,7 @@ public class RestClient {
 //    }
 
     /**
-     * This method is used to match student.
+     * This method is used to match student. And get the friends' location by the way.
      * @param studentId
      */
     public static JsonArray findCurrentFriends(int studentId) {
@@ -37,8 +37,10 @@ public class RestClient {
         //We use two requests here. Because of the rule of preventing reverse friendship.
         HttpURLConnection conn = null;
         HttpURLConnection conn2 = null;
+        HttpURLConnection connLocation = null;
         String url = "";
         String url2 = "";
+        String urlLocation = "";
         String textResult = "";
         String textResult2 = "";
         JsonArray friendsArray = new JsonArray();
@@ -46,15 +48,19 @@ public class RestClient {
         JsonArray friendshipsArray2 = null;
         final String methodPath = "friendship/findByStudOneId/";
         final String methodPath2 = "friendship/findByStudTwoId/";
+        final String methodPath3 = "location/findByStudentId/";
 
         try {
             url = BASE_URI + methodPath + studentId;
             url2 = BASE_URI + methodPath2 + studentId;
+
             //open the connection
             conn = setConnection(url, "GET", false);
             conn2 = setConnection(url2, "GET", false);
+
             Scanner inStream = new Scanner(conn.getInputStream());
             Scanner inStream2 = new Scanner(conn2.getInputStream());
+
             //read the input stream and store it as string
             while (inStream.hasNextLine()) {
                 textResult += inStream.nextLine();
@@ -81,6 +87,18 @@ public class RestClient {
                     friendsArray.add(friendship.get("studentOneId").getAsJsonObject());
                 }
             }
+            {
+
+            }
+            urlLocation = BASE_URI + methodPath3;
+            connLocation = setConnection(url2, "GET", false);
+            Scanner inStreamLocation = new Scanner(connLocation.getInputStream());
+            //get friends' location
+            while (inStreamLocation.hasNextLine()) {
+                textResult2 += inStream2.nextLine();
+            }
+            inStream2.close();
+
 //            Log.i("Info", new Integer(conn.getResponseCode()).toString());
         } catch (Exception e) {
             e.printStackTrace();
