@@ -199,13 +199,13 @@ public class RegisterFragment extends Fragment {
                 profile.setSuburb(suburb);
 
                 //store the profile in local
-                SharedPreferences spMyProfile = getActivity().getSharedPreferences("myProfile", Context.MODE_PRIVATE);
-                String sMyProfile = spMyProfile.getString("myProfile", null);
-                String jsMyProfile = new Gson().toJson(profile);
-
-                SharedPreferences.Editor eMyProfile = spMyProfile.edit();
-                eMyProfile.putString("myProfile", jsMyProfile);
-                eMyProfile.apply();
+//                SharedPreferences spMyProfile = getActivity().getSharedPreferences("myProfile", Context.MODE_PRIVATE);
+//                String sMyProfile = spMyProfile.getString("myProfile", null);
+//                String jsMyProfile = new Gson().toJson(profile);
+//
+//                SharedPreferences.Editor eMyProfile = spMyProfile.edit();
+//                eMyProfile.putString("myProfile", jsMyProfile);
+//                eMyProfile.apply();
                 new AsyncTask<String, Void, String>() {
                     @Override
                     protected void onPreExecute() {
@@ -222,7 +222,7 @@ public class RegisterFragment extends Fragment {
                     protected void onPostExecute(String response) {
                         Toast.makeText(getActivity().getApplicationContext(), response, Toast.LENGTH_LONG).show();
                     }
-                }.execute(jsMyProfile);
+                }.execute(new Gson().toJson(profile));
             }
         });
 

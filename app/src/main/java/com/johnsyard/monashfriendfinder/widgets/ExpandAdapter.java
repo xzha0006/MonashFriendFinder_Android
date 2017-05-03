@@ -68,6 +68,7 @@ public class ExpandAdapter extends BaseAdapter {
             holder.showArea = (LinearLayout) convertView.findViewById(R.id.layout_showArea);
             holder.tvName = (TextView) convertView.findViewById(R.id.tv_name);
             holder.tvMovie = (TextView) convertView.findViewById(R.id.tv_favorite_movie);
+            holder.tvStudentId = (TextView) convertView.findViewById(R.id.tv_student_id);
             holder.tvOtherContent = (TextView) convertView.findViewById(R.id.tv_other_content);
             holder.cbItem = (CheckBox) convertView.findViewById(R.id.cb_item);
             holder.hideArea = (LinearLayout) convertView.findViewById(R.id.layout_hideArea);
@@ -84,6 +85,7 @@ public class ExpandAdapter extends BaseAdapter {
 
         holder.tvName.setText(item.get("name"));
         holder.tvMovie.setText(item.get("movie"));
+        holder.tvStudentId.setText(item.get("studentId"));
         holder.tvOtherContent.setText(item.get("otherContent"));
 
         //if the content should be set into visible
@@ -144,11 +146,15 @@ public class ExpandAdapter extends BaseAdapter {
         ExpandAdapter.isSelected = isSelected;
     }
 
+    public ArrayList<HashMap<String, String>> getList(){
+        return this.list;
+    }
     private static class ViewHolder {
         private LinearLayout showArea;
 
         private TextView tvName;
         private TextView tvMovie;
+        private TextView tvStudentId;
         private TextView tvOtherContent;
         private CheckBox cbItem;
 

@@ -75,12 +75,12 @@ public class LoginFragment extends Fragment {
                         boolean isChecked = Boolean.parseBoolean(response.get("response").getAsString());
                         if (isChecked) {
                             //get user's student id
-                            int myStudentId = response.get("studentId").getAsInt();
+                            JsonObject myProfile = response.get("userInfo").getAsJsonObject();
                             //store the id in local
-                            SharedPreferences sp = getActivity().getSharedPreferences("myProfile", Context.MODE_PRIVATE);
-                            SharedPreferences.Editor eMyProfile = sp.edit();
-                            eMyProfile.putInt("myStudentId", myStudentId);
-                            eMyProfile.apply();
+                            SharedPreferences sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+                            SharedPreferences.Editor spEdit = sp.edit();
+                            spEdit.putString("myProfile", myProfile.toString());
+                            spEdit.apply();
                             //clear the data and go to home page
                             Toast.makeText(getActivity().getApplicationContext(), "Login Successfully!", Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(getActivity(), MainActivity.class);

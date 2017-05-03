@@ -19,7 +19,7 @@
         android:id="@+id/tv_user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="35dp"
+        android:layout_marginLeft="20dp"
         android:layout_marginTop="143dp"
         android:text="@string/tv_username"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -37,7 +37,8 @@
         android:layout_alignBaseline="@+id/tv_user_name"
         android:layout_alignBottom="@+id/tv_user_name"
         android:layout_toRightOf="@+id/tv_user_name"
-        android:layout_marginLeft="5dp" />
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="20dp" />
     <EditText
         android:id="@+id/et_password"
         android:layout_width="wrap_content"
@@ -47,7 +48,8 @@
         android:layout_alignLeft="@+id/et_user_name"
         android:layout_toRightOf="@+id/tv_password"
         android:ems="10"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        android:layout_marginRight="20dp"/>
 
     <Button
         android:id="@+id/bt_login"

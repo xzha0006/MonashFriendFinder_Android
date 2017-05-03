@@ -40,14 +40,21 @@
             android:id="@+id/tv_favorite_movie"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#0492F1"
+            android:textColor="#f795ad"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/tv_student_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="1dp"
+            android:textColor="#162834"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
             android:id="@+id/tv_other_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
             android:textColor="#162834"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 

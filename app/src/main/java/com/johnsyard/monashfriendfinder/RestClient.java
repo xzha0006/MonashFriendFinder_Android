@@ -59,11 +59,13 @@ public class RestClient {
             while (inStream.hasNextLine()) {
                 textResult += inStream.nextLine();
             }
+            inStream.close();
             friendshipsArray = new JsonParser().parse(textResult).getAsJsonArray();
 
             while (inStream2.hasNextLine()) {
                 textResult2 += inStream2.nextLine();
             }
+            inStream2.close();
             friendshipsArray2 = new JsonParser().parse(textResult2).getAsJsonArray();
 
             if (friendshipsArray.size() > 0){
@@ -110,6 +112,7 @@ public class RestClient {
             while (inStream.hasNextLine()) {
                 textResult += inStream.nextLine();
             }
+            inStream.close();
             friendsArray = new JsonParser().parse(textResult).getAsJsonArray();
 //            Log.i("Info", new Integer(conn.getResponseCode()).toString());
         } catch (Exception e) {
@@ -145,6 +148,7 @@ public class RestClient {
             while (inStream.hasNextLine()) {
                 textResult += inStream.nextLine();
             }
+            inStream.close();
             JsonObject weather = new JsonParser().parse(textResult).getAsJsonObject();
             temperature = weather.get("main").getAsJsonObject().get("temp").getAsDouble() - 273.15;
             DecimalFormat df = new DecimalFormat("#.##");
@@ -187,7 +191,6 @@ public class RestClient {
      * This method is used for login checking
      */
     public static JsonObject loginCheck(String userName, String password){
-        boolean result = false;
         String hashPassword = new String(Hex.encodeHex(DigestUtils.md5(password)));
         HttpURLConnection conn = null;
         Scanner inStream = null;

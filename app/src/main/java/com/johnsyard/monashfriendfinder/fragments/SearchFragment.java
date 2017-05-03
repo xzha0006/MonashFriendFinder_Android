@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.johnsyard.monashfriendfinder.R;
 import com.johnsyard.monashfriendfinder.RestClient;
 import com.johnsyard.monashfriendfinder.widgets.ExpandAdapter;
@@ -63,9 +64,10 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
         keywords = "/course/study mode";
         multiSelectionSpinner.setListener(this);
         //get user's studentId
-        SharedPreferences sp = getActivity().getSharedPreferences("myProfile", 0);
-        studentId = sp.getInt("myStudentId", -1);
-
+        SharedPreferences sp = getActivity().getSharedPreferences("userInfo", 0);
+        String myprofile = sp.getString("myProfile", null);
+        JsonObject myProfileJson = new JsonParser().parse(myprofile).getAsJsonObject();
+        studentId = myProfileJson.get("studentId").getAsInt();
         //do the search
         btSearch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,12 +81,8 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
                         @Override
                         protected JsonArray doInBackground(String... strings) {
                             JsonArray friendsArray = null;
-                            if (studentId < 0){
-                                Toast.makeText(getActivity().getApplicationContext(), "There is an error with user's studentId.", Toast.LENGTH_LONG).show();
-                            }else{
-                                String keywords = strings[0];
-                                friendsArray = RestClient.matchFriendsByAnyKeywords(studentId, keywords);
-                            }
+                            String keywords = strings[0];
+                            friendsArray = RestClient.matchFriendsByAnyKeywords(studentId, keywords);
                             return friendsArray;
                         }
 
@@ -120,8 +118,7 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
         ArrayList<HashMap<String, String>> datas = new ArrayList<HashMap<String,String>>();
         for(int i = 0; i < friendsArray.size(); i++){
             JsonObject friend = friendsArray.get(i).getAsJsonObject();
-            String otherContent = "Student Id: " + friend.get("studentId").getAsString() + "\n" +
-                    "Study Mode: " + friend.get("studyMode").getAsString() + "\n" +
+            String otherContent = "Study Mode: " + friend.get("studyMode").getAsString() + "\n" +
                     "Course: " + friend.get("course").getAsString() + "\n" +
                     "Gender: " + friend.get("gender").getAsString() + "\n" +
                     "Date Of Birth: " + friend.get("dateOfBirth").getAsString() + "\n" +
@@ -137,6 +134,7 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
             HashMap<String, String> item = new HashMap<>();
             item.put("name", friend.get("firstName").getAsString() + " " + friend.get("lastName").getAsString());
             item.put("movie", "Favorite Movie: " + friend.get("favouriteMovie").getAsString());
+            item.put("studentId", "Student Id: " + friend.get("studentId").getAsString());
             item.put("otherContent", otherContent);
             datas.add(item);
         }

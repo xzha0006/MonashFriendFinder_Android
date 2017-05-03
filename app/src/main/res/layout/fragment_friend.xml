@@ -14,7 +14,7 @@
     <ListView
         android:id="@+id/lt_friends"
         android:layout_width="match_parent"
-        android:layout_height="400dp"/>
+        android:layout_height="350dp"/>
 
     <Button
         android:id="@+id/bt_view_in_map"
