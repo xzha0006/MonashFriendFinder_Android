@@ -32,7 +32,25 @@ public class RestClient {
      * This method is used for adding student
      * @param friendships
      */
-    public static void addFriends(JsonArray friendships){
+    public static void addFriends(String friendships){
+        //initialise
+        HttpURLConnection conn = null;
+        final String methodPath = "friendship/";
+        try {
+            //open the connection
+            conn = setConnection(BASE_URI + methodPath, "POST", true);
+            conn.setFixedLengthStreamingMode(friendships.getBytes().length);
+            //Send the POST out
+            PrintWriter out = new PrintWriter(conn.getOutputStream());
+            out.print(friendships);
+            out.flush();
+            out.close();
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+        }
 
     }
     /**

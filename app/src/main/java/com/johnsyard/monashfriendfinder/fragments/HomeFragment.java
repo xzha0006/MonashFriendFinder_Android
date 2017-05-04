@@ -33,6 +33,8 @@ public class HomeFragment extends Fragment {
     private TextView tvTime;
     private TextView tvName;
 
+    private SharedPreferences sp;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -48,7 +50,7 @@ public class HomeFragment extends Fragment {
         String dateString = sdf.format(new Date());
         tvTime.setText("Login time: " + dateString);
         //get student name and id from shard preference
-        SharedPreferences sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         String myProfile = sp.getString("myProfile", null);
         JsonObject profileJson = new JsonParser().parse(myProfile).getAsJsonObject();
 
@@ -57,7 +59,7 @@ public class HomeFragment extends Fragment {
 
         tvName.setText("Hi, " + name);
         //get the initialized friend data
-        getFriends(studentId);
+        initializeFriends(studentId, sp);
 
         //get temperature
         new AsyncTask<String, Void, String>(){
@@ -76,7 +78,7 @@ public class HomeFragment extends Fragment {
     /**
      * This method is used to initialize friends data from the database.
      */
-    private void getFriends(int studentId){
+    public static void initializeFriends(int studentId, final SharedPreferences spSelf){
         new AsyncTask<Integer, Void, JsonArray>() {
             @Override
             protected JsonArray doInBackground(Integer... ints) {
@@ -89,8 +91,7 @@ public class HomeFragment extends Fragment {
             protected void onPostExecute(JsonArray friendsArray) {
                 //store the data into shardpreference
                 //friends and friend ids
-                SharedPreferences sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-                SharedPreferences.Editor spEdit = sp.edit();
+                SharedPreferences.Editor spEdit = spSelf.edit();
                 spEdit.putString("currentFriends", friendsArray.toString());
                 String friendIds = "";
                 if (friendsArray.size() > 0){

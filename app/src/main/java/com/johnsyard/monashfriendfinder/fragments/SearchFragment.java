@@ -17,6 +17,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -25,7 +26,9 @@ import com.johnsyard.monashfriendfinder.RestClient;
 import com.johnsyard.monashfriendfinder.widgets.ExpandAdapter;
 import com.johnsyard.monashfriendfinder.widgets.MultiSelectionSpinner;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,6 +52,8 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
     private int KEYWORD_NUM = 9;
 
     private ExpandAdapter adapter = null;
+    private SharedPreferences sp;
+    private String myProfileString;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -59,18 +64,19 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
         tvTitle = (TextView) vSearch.findViewById(R.id.tv_result_title);
         btViewInMap = (Button) vSearch.findViewById(R.id.bt_view_in_map);
         btAddFriend = (Button) vSearch.findViewById(R.id.bt_add_friend);
+        sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
 
+        myProfileString = sp.getString("myProfile", null);
+        JsonObject myProfileJson = new JsonParser().parse(myProfileString).getAsJsonObject();
+        studentId = myProfileJson.get("studentId").getAsInt();
 
         String[] array = {"course", "study mode", "suburb", "nationality", "native language", "favourite sport", "favourite movie", "favourite unit", "current job"};
         multiSelectionSpinner.setItems(array);
         multiSelectionSpinner.setSelection(new int[]{8});
-        keywords = "/current job";
         multiSelectionSpinner.setListener(this);
+        //initialize keywords in case user may search directly without pick.
+        keywords = "/current job////////";
         //get user's studentId
-        SharedPreferences sp = getActivity().getSharedPreferences("userInfo", 0);
-        String myprofile = sp.getString("myProfile", null);
-        JsonObject myProfileJson = new JsonParser().parse(myprofile).getAsJsonObject();
-        studentId = myProfileJson.get("studentId").getAsInt();
 
         //do the search
         btSearch.setOnClickListener(new View.OnClickListener() {
@@ -84,7 +90,7 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
                     new AsyncTask<String, Void, JsonArray>() {
                         @Override
                         protected JsonArray doInBackground(String... strings) {
-                            JsonArray peopleArray = null;
+                            JsonArray peopleArray;
                             JsonArray strangerArray = null;
                             String keywords = strings[0];
                             peopleArray = RestClient.matchFriendsByAnyKeywords(studentId, keywords);
@@ -122,17 +128,22 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
                 ArrayList<HashMap<String, String>> dataList = adapter.getList();
                 String ids = "";
                 int dataSize = dataList.size();
-                ArrayList<Integer> deletedItems = new ArrayList<Integer>();
+                ArrayList<Integer> deletedItems = new ArrayList<>();
+
+                JsonArray friendships = new JsonArray();
+
+                //use a for loop to fresh the data and get a json array of friendship
                 if (dataList.size() != 0) {
                     for (int i = 0; i < dataSize; i++) {
                         if (isSelected.get(i)) {
-                            String studentIdContent = dataList.get(i).get("studentId");
-                            String studentIdStr = studentIdContent.substring(studentIdContent.indexOf(":") + 1).trim();
-                            ids += studentIdStr + " ";
+//                            String studentIdContent = dataList.get(i).get("studentId");
+//                            String studentIdStr = studentIdContent.substring(studentIdContent.indexOf(":") + 1).trim();
+//                            ids += studentIdStr + " ";
                             deletedItems.add(i);
                             isSelected.put(i, false);
-                            //get stranger info
-//                            String studentIdContent = dataList.get(i).get("stranger");
+                            //get stranger info and create friendship
+                            JsonObject stranger = new JsonParser().parse(dataList.get(i).get("stranger")).getAsJsonObject();
+                            friendships.add(createFriendship(stranger));
                         }
                     }
                     //delete in desc order
@@ -141,11 +152,17 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
                     }
                     //tell adapter to change the data
                     adapter.notifyDataSetChanged();
-                    //remove the extra spaces
-                    ids = ids.trim();
                     //refresh the friend page.
-//                    getStrangers(studentId); add this latter
-                    Toast.makeText(getActivity().getApplicationContext(), ids + "is added", Toast.LENGTH_LONG).show();
+                    new AsyncTask<JsonArray, Void, Void>(){
+                        @Override
+                        protected Void doInBackground(JsonArray... jsonArrays) {
+                            RestClient.addFriends(jsonArrays[0].toString());
+                            //refresh friend information
+                            HomeFragment.initializeFriends(studentId, sp);
+                            return null;
+                        }
+                    }.execute(friendships);
+                    System.out.println(friendships);
                 }
             }
         });
@@ -162,12 +179,36 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
     }
 
     /**
+     * This method is used to create a json object of friendship
+     * @param person
+     * @return
+     */
+    private JsonObject createFriendship(JsonObject person){
+        JsonObject friendship = new JsonObject();
+        //set start time
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateString = sdf.format(new Date());
+        friendship.addProperty("startingDate", dateString);
+        friendship.add("endingDate", null);
+
+        JsonObject myProfile = new JsonParser().parse(myProfileString).getAsJsonObject();
+        int myId = myProfile.get("studentId").getAsInt();
+        int personId = person.get("studentId").getAsInt();
+        if (myId < personId){
+            friendship.add("studentOneId", myProfile);
+            friendship.add("studentTwoId", person);
+        }else{
+            friendship.add("studentOneId", person);
+            friendship.add("studentTwoId", myProfile);
+        }
+        return friendship;
+    }
+    /**
      * This method is used to filter friends and ge strangers
      * @param peopleArray
      * @return
      */
     private JsonArray getStrangers(JsonArray peopleArray){
-        SharedPreferences sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         String friendIds = sp.getString("friendIds", null);
         JsonArray strangerArray = new JsonArray();
         //if has friends

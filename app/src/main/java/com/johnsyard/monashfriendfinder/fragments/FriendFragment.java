@@ -38,6 +38,8 @@ public class FriendFragment extends Fragment {
     private Button btDelete;
 
     private ExpandAdapter adapter = null;
+    private SharedPreferences sp;
+    private int studentId;
 
     @Nullable
     @Override
@@ -52,13 +54,13 @@ public class FriendFragment extends Fragment {
         btDelete = (Button) vFriend.findViewById(R.id.bt_delete);
 
         //get user's studentId
-        SharedPreferences sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         String myProfile = sp.getString("myProfile", null);
         JsonObject profileJson = new JsonParser().parse(myProfile).getAsJsonObject();
 
-        final int studentId = profileJson.get("studentId").getAsInt();
+        studentId = profileJson.get("studentId").getAsInt();
         //fresh the friend data
-        this.getFriends(studentId);
+        HomeFragment.initializeFriends(studentId, sp);
 
         //delete friends
         btDelete.setOnClickListener(new View.OnClickListener() {
@@ -89,7 +91,11 @@ public class FriendFragment extends Fragment {
                     ids = ids.trim();
                     //refresh the friend page.
                     //can be put into ays
-                    getFriends(studentId);
+//                    getFriends(studentId);
+                    HomeFragment.initializeFriends(studentId, sp);
+                    //get friend array from sharepreference
+                    JsonArray friendArray = new JsonParser().parse(sp.getString("currentFriends", "[]")).getAsJsonArray();
+                    setContent(friendArray);
                     Toast.makeText(getActivity().getApplicationContext(), ids, Toast.LENGTH_LONG).show();
                 }
             }
@@ -108,46 +114,21 @@ public class FriendFragment extends Fragment {
     }
 
     /**
-     * This method is used to get friends data from the database.
+     * This method is used to set the result list
      */
-    private void getFriends(int studentId){
-        new AsyncTask<Integer, Void, JsonArray>() {
-            @Override
-            protected JsonArray doInBackground(Integer... ints) {
-                JsonArray friendsArray = null;
-                friendsArray = RestClient.findCurrentFriends(ints[0]);
-                return friendsArray;
-            }
-
-            @Override
-            protected void onPostExecute(JsonArray friendsArray) {
-                //store the data into shardpreference
-                SharedPreferences sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-                SharedPreferences.Editor spEdit = sp.edit();
-                spEdit.putString("currentFriends", friendsArray.toString());
-                String friendIds = "";
-                if (friendsArray.size() > 0){
-                for (int i = 0; i < friendsArray.size(); i++){
-                    friendIds += friendsArray.get(i).getAsJsonObject().get("studentId").getAsString() + ",";
-                }
-                friendIds = friendIds.substring(0, friendIds.length() - 1);}
-                spEdit.putString("friendIds", friendIds);
-                spEdit.apply();
-
-                if (friendsArray.size() != 0){
-                    //has matched results
-                    ArrayList<HashMap<String, String>> data = formatData(friendsArray);
-                    adapter = new ExpandAdapter(getActivity().getApplicationContext(), data);
-                    //show the data
-                    tvTitle.setText("Your Friends:");
-                    lvFriends.setAdapter(adapter);
-                    btViewInMap.setVisibility(View.VISIBLE);
-                    btDelete.setVisibility(View.VISIBLE);
-                }else {
-                    tvTitle.setText("Sorry, you do not have any friend yet.");
-                }
-            }
-        }.execute(studentId);
+    private void setContent(JsonArray friendsArray){
+        if (friendsArray.size() != 0){
+            //has matched results
+            ArrayList<HashMap<String, String>> data = formatData(friendsArray);
+            adapter = new ExpandAdapter(getActivity().getApplicationContext(), data);
+            //show the data
+            tvTitle.setText("Your Friends:");
+            lvFriends.setAdapter(adapter);
+            btViewInMap.setVisibility(View.VISIBLE);
+            btDelete.setVisibility(View.VISIBLE);
+        }else {
+            tvTitle.setText("Sorry, you do not have any friend yet.");
+        }
     }
     /**
      * This method is for adapter data formatting
