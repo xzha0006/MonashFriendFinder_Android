@@ -3,6 +3,7 @@ package com.johnsyard.monashfriendfinder.fragments;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.SQLException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -16,6 +17,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.johnsyard.monashfriendfinder.R;
 import com.johnsyard.monashfriendfinder.RestClient;
+import com.johnsyard.monashfriendfinder.dbmanager.DBManager;
 import com.johnsyard.monashfriendfinder.widgets.ExpandAdapter;
 
 import java.text.SimpleDateFormat;
@@ -28,12 +30,17 @@ import java.util.HashMap;
  */
 
 public class HomeFragment extends Fragment {
+    final int BASE_LATITUDE = -35;
+    final int BASE_LONGITUDE = 145;
+    final int LAT_LONG_RANGE = 3;
+
     private View vHome;
     private TextView tvTemp;
     private TextView tvTime;
     private TextView tvName;
 
     private SharedPreferences sp;
+    private DBManager dbManager;
 
     @Nullable
     @Override
@@ -42,13 +49,24 @@ public class HomeFragment extends Fragment {
         tvTemp = (TextView) vHome.findViewById(R.id.tv_temperature);
         tvTime = (TextView) vHome.findViewById(R.id.tv_time);
         tvName = (TextView) vHome.findViewById(R.id.tv_hi);
-        //should be changed
-        String latitude = "-37.8";
-        String longitude = "145";
+        //get location
+        JsonObject location = initLocation();
+        //insert info into database
+        try {
+            dbManager.open();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        String latitude = location.get("latitude").toString();
+        String longitude = location.get("longitude").toString();
 
+        dbManager.insertUser("1", latitude, longitude);
+        dbManager.close();
+        //get time stamp
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String dateString = sdf.format(new Date());
         tvTime.setText("Login time: " + dateString);
+
         //get student name and id from shard preference
         sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         String myProfile = sp.getString("myProfile", null);
@@ -82,16 +100,25 @@ public class HomeFragment extends Fragment {
         new AsyncTask<Integer, Void, JsonArray>() {
             @Override
             protected JsonArray doInBackground(Integer... ints) {
-                JsonArray friendsArray = null;
-                friendsArray = RestClient.findCurrentFriends(ints[0]);
-                return friendsArray;
+                JsonArray friendshipArray = null;
+                friendshipArray = RestClient.findCurrentFriends(ints[0]);
+                return friendshipArray;
             }
 
             @Override
-            protected void onPostExecute(JsonArray friendsArray) {
+            protected void onPostExecute(JsonArray friendshipArray) {
                 //store the data into shardpreference
                 //friends and friend ids
                 SharedPreferences.Editor spEdit = spSelf.edit();
+                spEdit.putString("friendships", friendshipArray.toString());
+                //get friends from friendships
+                JsonArray friendsArray = new JsonArray();
+                if (friendshipArray.size() > 0){
+                    for (int i = 0; i < friendshipArray.size(); i++){
+                        JsonObject friend = friendshipArray.get(i).getAsJsonObject().get("friend").getAsJsonObject();
+                        friendsArray.add(friend);
+                    }
+                }
                 spEdit.putString("currentFriends", friendsArray.toString());
                 String friendIds = "";
                 if (friendsArray.size() > 0){
@@ -103,5 +130,19 @@ public class HomeFragment extends Fragment {
                 spEdit.apply();
             }
         }.execute(studentId);
+    }
+
+    /**
+     * Create user location randomly range is -35 +- 4 and 145 +- 4
+     * @return location
+     */
+    private JsonObject initLocation(){
+        double delta = Math.random() * LAT_LONG_RANGE;
+        double latitude = BASE_LATITUDE + delta;
+        double longitude = BASE_LONGITUDE + delta;
+        JsonObject location = new JsonObject();
+        location.addProperty("latitude", latitude);
+        location.addProperty("longitude", longitude);
+        return location;
     }
 }

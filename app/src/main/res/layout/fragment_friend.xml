@@ -17,18 +17,18 @@
         android:layout_height="350dp"/>
 
     <Button
-        android:id="@+id/bt_view_in_map"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="View friends in map" />
-
-    <Button
         android:id="@+id/bt_delete"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
         android:text="Delete selected friends" />
+
+    <Button
+        android:id="@+id/bt_view_in_map"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="View friends in map" />
 
 
 

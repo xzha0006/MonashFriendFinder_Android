@@ -2,6 +2,7 @@ package com.johnsyard.monashfriendfinder.dbmanager;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -21,6 +22,9 @@ public class DBManager {
     private static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + DBStructure.tableEntry.TABLE_NAME;
     private MySQLiteOpenHelper myDBHelper;
     private SQLiteDatabase db;
+
+    private String[] projection = {DBStructure.tableEntry.LOCATION_ID,
+            DBStructure.tableEntry.LATITUDE, DBStructure.tableEntry.LONGITUDE};
 
     public DBManager(Context ctx) {
         this.context = ctx;
@@ -65,5 +69,17 @@ public class DBManager {
         values.put(DBStructure.tableEntry.LATITUDE, latitude);
         values.put(DBStructure.tableEntry.LONGITUDE, longitude);
         return db.insert(DBStructure.tableEntry.TABLE_NAME, null, values);
+    }
+
+    public int deleteUser(String rowId) {
+        String[] selectionArgs = {String.valueOf(rowId)};
+        String selection = DBStructure.tableEntry.LOCATION_ID + " LIKE ?";
+        return db.delete(DBStructure.tableEntry.TABLE_NAME, selection, selectionArgs);
+    }
+
+    public Cursor selectUser(String rowId) {
+        String[] selectionArgs = {String.valueOf(rowId)};
+        String selection = DBStructure.tableEntry.LOCATION_ID + " LIKE ?";
+        return db.query(DBStructure.tableEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, null);
     }
 }

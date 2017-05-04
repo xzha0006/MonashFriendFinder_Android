@@ -22,7 +22,9 @@ import com.johnsyard.monashfriendfinder.R;
 import com.johnsyard.monashfriendfinder.RestClient;
 import com.johnsyard.monashfriendfinder.widgets.ExpandAdapter;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -40,6 +42,7 @@ public class FriendFragment extends Fragment {
     private ExpandAdapter adapter = null;
     private SharedPreferences sp;
     private int studentId;
+    private String myProfileString;
 
     @Nullable
     @Override
@@ -55,30 +58,30 @@ public class FriendFragment extends Fragment {
 
         //get user's studentId
         sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        String myProfile = sp.getString("myProfile", null);
-        JsonObject profileJson = new JsonParser().parse(myProfile).getAsJsonObject();
+        myProfileString = sp.getString("myProfile", null);
+        JsonObject profileJson = new JsonParser().parse(myProfileString).getAsJsonObject();
 
         studentId = profileJson.get("studentId").getAsInt();
         //fresh the friend data
-        HomeFragment.initializeFriends(studentId, sp);
-
+        refreshContent(studentId, sp);
         //delete friends
         btDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 HashMap<Integer, Boolean> isSelected = adapter.getIsSelected();
                 ArrayList<HashMap<String, String>> dataList = adapter.getList();
-                String ids = "";
                 int dataSize = dataList.size();
                 ArrayList<Integer> deletedItems = new ArrayList<Integer>();
+
+                JsonArray friendships = new JsonArray();
+                //use a for loop to fresh the data and get a json array of friendship
                 if (dataList.size() != 0){
                     for (int i = 0; i < dataSize; i++){
                         if (isSelected.get(i)){
-                            String studentIdContent = dataList.get(i).get("studentId");
-                            String studentIdStr = studentIdContent.substring(studentIdContent.indexOf(":") + 1).trim();
-                            ids += studentIdStr + " ";
                             deletedItems.add(i);
+                            JsonObject friend = new JsonParser().parse(dataList.get(i).get("friend")).getAsJsonObject();
                             isSelected.put(i, false);
+                            friendships.add(endFriendship(friend));
                         }
                     }
 
@@ -87,16 +90,22 @@ public class FriendFragment extends Fragment {
                     }
                     //tell adapter to change the data
                     adapter.notifyDataSetChanged();
-                    //remove the extra spaces
-                    ids = ids.trim();
+
+                    new AsyncTask<JsonArray, Void, String>(){
+                        @Override
+                        protected String doInBackground(JsonArray... jsonArrays) {
+                            RestClient.deleteFriends(jsonArrays[0].toString());
+                            //refresh friend information
+                            return "";
+
+                        }
+                        @Override
+                        protected void onPostExecute(String s) {
+                            HomeFragment.initializeFriends(studentId, sp);
+                        }
+                    }.execute(friendships);
                     //refresh the friend page.
-                    //can be put into ays
-//                    getFriends(studentId);
-                    HomeFragment.initializeFriends(studentId, sp);
-                    //get friend array from sharepreference
-                    JsonArray friendArray = new JsonParser().parse(sp.getString("currentFriends", "[]")).getAsJsonArray();
-                    setContent(friendArray);
-                    Toast.makeText(getActivity().getApplicationContext(), ids, Toast.LENGTH_LONG).show();
+
                 }
             }
         });
@@ -114,9 +123,50 @@ public class FriendFragment extends Fragment {
     }
 
     /**
+     * This method is used to create a json object of friendship for ending
+     * @param person
+     * @return
+     */
+    private JsonObject endFriendship(JsonObject person){
+        JsonObject friendship = new JsonObject();
+        //get friendships
+        JsonArray friendshipArray = new JsonParser().parse(sp.getString("friendships", "[]")).getAsJsonArray();
+
+        JsonObject myProfile = new JsonParser().parse(myProfileString).getAsJsonObject();
+        int myId = myProfile.get("studentId").getAsInt();
+        int personId = person.get("studentId").getAsInt();
+        //get the starting date and friendship id
+        for (int i = 0; i < friendshipArray.size(); i++){
+            JsonObject oldFriendship = friendshipArray.get(i).getAsJsonObject();
+            JsonObject friend = oldFriendship.get("friend").getAsJsonObject();
+            if (friend.get("studentId").getAsInt() == personId){
+                friendship.add("friendshipId", oldFriendship.get("friendshipId"));
+                friendship.add("startingDate", oldFriendship.get("startingDate"));
+            }
+        }
+
+        //set ending time
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateString = sdf.format(new Date());
+        friendship.addProperty("endingDate", dateString);
+
+        if (myId < personId){
+            friendship.add("studentOneId", myProfile);
+            friendship.add("studentTwoId", person);
+        }else{
+            friendship.add("studentOneId", person);
+            friendship.add("studentTwoId", myProfile);
+        }
+        return friendship;
+    }
+
+    /**
      * This method is used to set the result list
      */
-    private void setContent(JsonArray friendsArray){
+    private void refreshContent(int studentId, SharedPreferences sp){
+        HomeFragment.initializeFriends(studentId, sp);
+        //get friend array from sharepreference
+        JsonArray friendsArray = new JsonParser().parse(sp.getString("currentFriends", "[]")).getAsJsonArray();
         if (friendsArray.size() != 0){
             //has matched results
             ArrayList<HashMap<String, String>> data = formatData(friendsArray);

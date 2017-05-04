@@ -1,8 +1,11 @@
 package com.johnsyard.monashfriendfinder;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -24,9 +27,98 @@ public class RestClient {
     private static final String BASE_URI = "http://100.103.124.90:8080/MonashFriendFinder/webresources/entities.";
     private static final String WEATHER_API = "http://api.openweathermap.org/data/2.5/weather?";
 
-//    public static void main(String[] args){
-//        System.out.println("test: " + loginCheck("js@monash.edu", "JS12345"));
-//    }
+    public static void main(String[] args){
+        System.out.println("test: " + getMovieInfo("Batman"));
+    }
+
+    /**
+     * This method is used google API to get Info and image url
+     * @param movie
+     * @return
+     */
+    public static JsonObject getMovieInfo(String movie) {
+        JsonObject result = new JsonObject();
+        result.addProperty("movie", movie);
+        HttpURLConnection conn = null;
+        String url = "";
+        String textResult = "";
+        String API_key = "AIzaSyAWEUYcQNc5EI0shEmjtvNiqjbYoSUVnEA";
+        String SEARCH_ID_cx = "001385470827581850993:olsi6ty9avi";
+        final String methodPath = "https://www.googleapis.com/customsearch/v1?key=" + API_key + "&cx=" + SEARCH_ID_cx + "&q=" + movie + "&num=3";
+
+        try {
+            url = methodPath;
+            //open the connection
+            conn = setConnection(url, "GET", false);
+            Scanner inStream = new Scanner(conn.getInputStream());
+            //read the input stream and store it as string
+            while (inStream.hasNextLine()) {
+                textResult += inStream.nextLine();
+            }
+            inStream.close();
+            JsonObject response = new JsonParser().parse(textResult).getAsJsonObject();
+            JsonArray items = response.get("items").getAsJsonArray();
+            if (items.size() > 0){
+                String description = items.get(0).getAsJsonObject().get("snippet").toString();
+                JsonArray movieInfo = items.get(0).getAsJsonObject().get("pagemap").getAsJsonObject().get("movie").getAsJsonArray();
+                //get image url
+                String imgUrl = movieInfo.get(0).getAsJsonObject().get("image").toString();
+                result.addProperty("imgUrl", imgUrl);
+                result.addProperty("description", description);
+            }
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+        }
+        return result;
+    }
+
+    /**
+     * This is used to get the image from a url
+     * @param imgUrl
+     * @return
+     */
+    public static Bitmap getMovieImage(String imgUrl) {
+        Bitmap bitmap = null;
+        HttpURLConnection connImg = null;
+        try {
+            connImg = setConnection(imgUrl, "GET", false);
+            //read the image
+             bitmap = BitmapFactory.decodeStream(connImg.getInputStream());
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            connImg.disconnect();
+        }
+        return bitmap;
+    }
+    /**
+     * This method is used for deleting student
+     * @param friendships
+     */
+    public static void deleteFriends(String friendships){
+        //initialise
+        HttpURLConnection conn = null;
+        final String methodPath = "friendship/upload";
+        try {
+            //open the connection
+            conn = setConnection(BASE_URI + methodPath, "PUT", true);
+            conn.setFixedLengthStreamingMode(friendships.getBytes().length);
+            //Send the POST out
+            PrintWriter out = new PrintWriter(conn.getOutputStream());
+            out.print(friendships);
+            out.flush();
+            out.close();
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+        }
+    }
 
     /**
      * This method is used for adding student
@@ -87,7 +179,7 @@ public class RestClient {
     }
 
     /**
-     * This method is used to match student.
+     * This method is used to match student. geting both friend profile and starting date
      * @param studentId
      */
     public static JsonArray findCurrentFriends(int studentId) {
@@ -99,9 +191,9 @@ public class RestClient {
         String url2 = "";
         String textResult = "";
         String textResult2 = "";
-        JsonArray friendsArray = new JsonArray();
-        JsonArray friendshipsArray = null;
-        JsonArray friendshipsArray2 = null;
+        JsonArray friendshipArray = new JsonArray();
+        JsonArray friendshipsArray;
+        JsonArray friendshipsArray2;
         final String methodPath = "friendship/findByStudOneId/";
         final String methodPath2 = "friendship/findByStudTwoId/";
 
@@ -115,7 +207,6 @@ public class RestClient {
 
             Scanner inStream = new Scanner(conn.getInputStream());
             Scanner inStream2 = new Scanner(conn2.getInputStream());
-
             //read the input stream and store it as string
             while (inStream.hasNextLine()) {
                 textResult += inStream.nextLine();
@@ -132,14 +223,30 @@ public class RestClient {
             if (friendshipsArray.size() > 0){
                 for (int i = 0; i < friendshipsArray.size(); i++){
                     JsonObject friendship = friendshipsArray.get(i).getAsJsonObject();
-                    friendsArray.add(friendship.get("studentTwoId").getAsJsonObject());
+                    JsonObject friend = friendship.get("studentTwoId").getAsJsonObject();
+                    JsonElement startingDate = friendship.get("startingDate");
+                    JsonElement friendshipId = friendship.get("friendshipId");
+
+                    JsonObject newFriendshipObject = new JsonObject();
+                    newFriendshipObject.add("friend", friend);
+                    newFriendshipObject.add("startingDate", startingDate);
+                    newFriendshipObject.add("friendshipId", friendshipId);
+                    friendshipArray.add(newFriendshipObject);
                 }
             }
 
             if (friendshipsArray2.size() > 0){
                 for (int j = 0; j < friendshipsArray2.size(); j++){
                     JsonObject friendship = friendshipsArray2.get(j).getAsJsonObject();
-                    friendsArray.add(friendship.get("studentOneId").getAsJsonObject());
+                    JsonObject friend = friendship.get("studentOneId").getAsJsonObject();
+                    JsonElement startingDate = friendship.get("startingDate");
+                    JsonElement friendshipId = friendship.get("friendshipId");
+
+                    JsonObject newFriendshipObject = new JsonObject();
+                    newFriendshipObject.add("friend", friend);
+                    newFriendshipObject.add("startingDate", startingDate);
+                    newFriendshipObject.add("friendshipId", friendshipId);
+                    friendshipArray.add(newFriendshipObject);
                 }
             }
 //            Log.i("Info", new Integer(conn.getResponseCode()).toString());
@@ -148,7 +255,7 @@ public class RestClient {
         } finally {
             conn.disconnect();
         }
-        return friendsArray;
+        return friendshipArray;
     }
 
     /**

@@ -112,6 +112,9 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
                                 btViewInMap.setVisibility(View.VISIBLE);
                                 btAddFriend.setVisibility(View.VISIBLE);
                             }else {
+                                tvTitle.setVisibility(View.GONE);
+                                btViewInMap.setVisibility(View.GONE);
+                                btAddFriend.setVisibility(View.GONE);
                                 Toast.makeText(getActivity().getApplicationContext(), "No student matches the keywords.", Toast.LENGTH_LONG).show();
                             }
                         }
@@ -126,7 +129,6 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
             public void onClick(View view) {
                 HashMap<Integer, Boolean> isSelected = adapter.getIsSelected();
                 ArrayList<HashMap<String, String>> dataList = adapter.getList();
-                String ids = "";
                 int dataSize = dataList.size();
                 ArrayList<Integer> deletedItems = new ArrayList<>();
 
@@ -136,9 +138,6 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
                 if (dataList.size() != 0) {
                     for (int i = 0; i < dataSize; i++) {
                         if (isSelected.get(i)) {
-//                            String studentIdContent = dataList.get(i).get("studentId");
-//                            String studentIdStr = studentIdContent.substring(studentIdContent.indexOf(":") + 1).trim();
-//                            ids += studentIdStr + " ";
                             deletedItems.add(i);
                             isSelected.put(i, false);
                             //get stranger info and create friendship
@@ -162,7 +161,7 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
                             return null;
                         }
                     }.execute(friendships);
-                    System.out.println(friendships);
+//                    System.out.println(friendships);
                 }
             }
         });
