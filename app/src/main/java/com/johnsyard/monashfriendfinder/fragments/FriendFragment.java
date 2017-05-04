@@ -8,7 +8,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -25,7 +24,6 @@ import com.johnsyard.monashfriendfinder.widgets.ExpandAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * This is the friend fragment
@@ -39,10 +37,7 @@ public class FriendFragment extends Fragment {
     private Button btViewInMap;
     private Button btDelete;
 
-
-    int studentId;
-    ExpandAdapter adapter = null;
-    int KEYWORD_NUM = 9;
+    private ExpandAdapter adapter = null;
 
     @Nullable
     @Override
@@ -61,9 +56,9 @@ public class FriendFragment extends Fragment {
         String myProfile = sp.getString("myProfile", null);
         JsonObject profileJson = new JsonParser().parse(myProfile).getAsJsonObject();
 
-        studentId = profileJson.get("studentId").getAsInt();
-
-        this.getFriends();
+        final int studentId = profileJson.get("studentId").getAsInt();
+        //fresh the friend data
+        this.getFriends(studentId);
 
         //delete friends
         btDelete.setOnClickListener(new View.OnClickListener() {
@@ -93,7 +88,8 @@ public class FriendFragment extends Fragment {
                     //remove the extra spaces
                     ids = ids.trim();
                     //refresh the friend page.
-                    getFriends();
+                    //can be put into ays
+                    getFriends(studentId);
                     Toast.makeText(getActivity().getApplicationContext(), ids, Toast.LENGTH_LONG).show();
                 }
             }
@@ -104,7 +100,7 @@ public class FriendFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, new FriendMapFragment()).commit();
             }
         });
 
@@ -114,12 +110,12 @@ public class FriendFragment extends Fragment {
     /**
      * This method is used to get friends data from the database.
      */
-    private void getFriends(){
-        new AsyncTask<String, Void, JsonArray>() {
+    private void getFriends(int studentId){
+        new AsyncTask<Integer, Void, JsonArray>() {
             @Override
-            protected JsonArray doInBackground(String... strings) {
+            protected JsonArray doInBackground(Integer... ints) {
                 JsonArray friendsArray = null;
-                friendsArray = RestClient.findCurrentFriends(studentId);
+                friendsArray = RestClient.findCurrentFriends(ints[0]);
                 return friendsArray;
             }
 
@@ -129,6 +125,13 @@ public class FriendFragment extends Fragment {
                 SharedPreferences sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
                 SharedPreferences.Editor spEdit = sp.edit();
                 spEdit.putString("currentFriends", friendsArray.toString());
+                String friendIds = "";
+                if (friendsArray.size() > 0){
+                for (int i = 0; i < friendsArray.size(); i++){
+                    friendIds += friendsArray.get(i).getAsJsonObject().get("studentId").getAsString() + ",";
+                }
+                friendIds = friendIds.substring(0, friendIds.length() - 1);}
+                spEdit.putString("friendIds", friendIds);
                 spEdit.apply();
 
                 if (friendsArray.size() != 0){
@@ -144,7 +147,7 @@ public class FriendFragment extends Fragment {
                     tvTitle.setText("Sorry, you do not have any friend yet.");
                 }
             }
-        }.execute();
+        }.execute(studentId);
     }
     /**
      * This method is for adapter data formatting
@@ -169,6 +172,7 @@ public class FriendFragment extends Fragment {
 
 
             HashMap<String, String> item = new HashMap<>();
+            item.put("friend", friend.toString());
             item.put("name", friend.get("firstName").getAsString() + " " + friend.get("lastName").getAsString());
             item.put("movie", "Favorite Movie: " + friend.get("favouriteMovie").getAsString());
             item.put("studentId", "Student Id: " + friend.get("studentId").getAsString());

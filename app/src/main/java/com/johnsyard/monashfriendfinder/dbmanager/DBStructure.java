@@ -12,10 +12,10 @@ import android.provider.BaseColumns;
 
 public class DBStructure {
     public static abstract class tableEntry implements BaseColumns {
-        public static final String TABLE_NAME = "user";
-        public static final String COLUMN_ID = "userid";
-        public static final String COLUMN_NAME = "name";
-        public static final String COLUMN_DOB = "dob";
+        public static final String TABLE_NAME = "user_location";
+        public static final String LOCATION_ID = "location_id";
+        public static final String LATITUDE = "latitude";
+        public static final String LONGITUDE = "longitude";
     }
 
 }

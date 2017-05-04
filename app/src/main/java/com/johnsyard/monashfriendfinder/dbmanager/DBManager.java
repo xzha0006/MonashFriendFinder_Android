@@ -17,7 +17,7 @@ public class DBManager {
     private final Context context;
     private static final String TEXT_TYPE = " TEXT";
     private static final String COMMA_SEP = ",";
-    private static final String SQL_CREATE_ENTRIES = "CREATE TABLE " + DBStructure.tableEntry.TABLE_NAME + " (" + DBStructure.tableEntry._ID + " INTEGER PRIMARY KEY," + DBStructure.tableEntry.COLUMN_ID + TEXT_TYPE + COMMA_SEP + DBStructure.tableEntry.COLUMN_NAME + TEXT_TYPE + COMMA_SEP + DBStructure.tableEntry.COLUMN_DOB + TEXT_TYPE + " );";
+    private static final String SQL_CREATE_ENTRIES = "CREATE TABLE " + DBStructure.tableEntry.TABLE_NAME + " (" + DBStructure.tableEntry._ID + " INTEGER PRIMARY KEY," + DBStructure.tableEntry.LOCATION_ID + TEXT_TYPE + COMMA_SEP + DBStructure.tableEntry.LATITUDE + TEXT_TYPE + COMMA_SEP + DBStructure.tableEntry.LONGITUDE + TEXT_TYPE + " );";
     private static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + DBStructure.tableEntry.TABLE_NAME;
     private MySQLiteOpenHelper myDBHelper;
     private SQLiteDatabase db;
@@ -59,11 +59,11 @@ public class DBManager {
         myDBHelper.close();
     }
 
-    public long insertUser(String id, String name, String dob) {
+    public long insertUser(String id, String latitude, String longitude) {
         ContentValues values = new ContentValues();
-        values.put(DBStructure.tableEntry.COLUMN_ID, id);
-        values.put(DBStructure.tableEntry.COLUMN_NAME, name);
-        values.put(DBStructure.tableEntry.COLUMN_DOB, dob);
+        values.put(DBStructure.tableEntry.LOCATION_ID, id);
+        values.put(DBStructure.tableEntry.LATITUDE, latitude);
+        values.put(DBStructure.tableEntry.LONGITUDE, longitude);
         return db.insert(DBStructure.tableEntry.TABLE_NAME, null, values);
     }
 }

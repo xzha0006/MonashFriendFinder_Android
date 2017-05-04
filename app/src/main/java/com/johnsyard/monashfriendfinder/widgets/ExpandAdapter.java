@@ -94,7 +94,7 @@ public class ExpandAdapter extends BaseAdapter {
         } else {
             holder.hideArea.setVisibility(View.GONE);
         }
-
+        //click showArea
         holder.showArea.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -111,7 +111,7 @@ public class ExpandAdapter extends BaseAdapter {
                 notifyDataSetChanged();
             }
         });
-
+        //click checkbox
         holder.cbItem.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Toast.makeText(context, "checkbox is clicked", Toast.LENGTH_SHORT).show();
@@ -125,14 +125,6 @@ public class ExpandAdapter extends BaseAdapter {
                 notifyDataSetChanged();
             }
         });
-
-//        holder.tvPhoneType.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View view) {
-//                Toast.makeText(context, "hehe", Toast.LENGTH_SHORT).show();
-//            }
-//        });
 
         holder.cbItem.setChecked(getIsSelected().get(position));
         return convertView;

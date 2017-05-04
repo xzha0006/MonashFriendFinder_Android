@@ -21,7 +21,7 @@ import java.util.Scanner;
  */
 
 public class RestClient {
-    private static final String BASE_URI = "http://118.139.5.84:8080/MonashFriendFinder/webresources/entities.";
+    private static final String BASE_URI = "http://100.103.124.90:8080/MonashFriendFinder/webresources/entities.";
     private static final String WEATHER_API = "http://api.openweathermap.org/data/2.5/weather?";
 
 //    public static void main(String[] args){
@@ -29,7 +29,47 @@ public class RestClient {
 //    }
 
     /**
-     * This method is used to match student. And get the friends' location by the way.
+     * This method is used for adding student
+     * @param friendships
+     */
+    public static void addFriends(JsonArray friendships){
+
+    }
+    /**
+     * This method is used to get students' locations by ids. The ids format should be "1,2,3"
+     * @param ids
+     * @return
+     */
+    public static JsonArray findLocationsByIds(String ids) {
+        JsonArray locations = new JsonArray();
+        HttpURLConnection conn = null;
+        String url = "";
+        String textResult = "";
+        final String methodPath = "location/findByStudentIds/";
+
+        try {
+            url = BASE_URI + methodPath + ids;
+            //open the connection
+            conn = setConnection(url, "GET", false);
+            Scanner inStream = new Scanner(conn.getInputStream());
+            //read the input stream and store it as string
+            while (inStream.hasNextLine()) {
+                textResult += inStream.nextLine();
+            }
+            inStream.close();
+            locations = new JsonParser().parse(textResult).getAsJsonArray();
+
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+        }
+        return locations;
+    }
+
+    /**
+     * This method is used to match student.
      * @param studentId
      */
     public static JsonArray findCurrentFriends(int studentId) {
@@ -37,10 +77,8 @@ public class RestClient {
         //We use two requests here. Because of the rule of preventing reverse friendship.
         HttpURLConnection conn = null;
         HttpURLConnection conn2 = null;
-        HttpURLConnection connLocation = null;
         String url = "";
         String url2 = "";
-        String urlLocation = "";
         String textResult = "";
         String textResult2 = "";
         JsonArray friendsArray = new JsonArray();
@@ -48,7 +86,6 @@ public class RestClient {
         JsonArray friendshipsArray2 = null;
         final String methodPath = "friendship/findByStudOneId/";
         final String methodPath2 = "friendship/findByStudTwoId/";
-        final String methodPath3 = "location/findByStudentId/";
 
         try {
             url = BASE_URI + methodPath + studentId;
@@ -87,18 +124,6 @@ public class RestClient {
                     friendsArray.add(friendship.get("studentOneId").getAsJsonObject());
                 }
             }
-            {
-
-            }
-            urlLocation = BASE_URI + methodPath3;
-            connLocation = setConnection(url2, "GET", false);
-            Scanner inStreamLocation = new Scanner(connLocation.getInputStream());
-            //get friends' location
-            while (inStreamLocation.hasNextLine()) {
-                textResult2 += inStream2.nextLine();
-            }
-            inStream2.close();
-
 //            Log.i("Info", new Integer(conn.getResponseCode()).toString());
         } catch (Exception e) {
             e.printStackTrace();
@@ -124,7 +149,7 @@ public class RestClient {
         try {
             url = BASE_URI + methodPath + studentId + keywords;
             //open the connection
-            conn = setConnection(url, "GET", false);
+            conn = setConnection(url.replace(" ", "%20"), "GET", false);
             Scanner inStream = new Scanner(conn.getInputStream());
             //read the input stream and store it as string
             while (inStream.hasNextLine()) {
