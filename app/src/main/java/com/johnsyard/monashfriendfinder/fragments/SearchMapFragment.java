@@ -3,6 +3,8 @@ package com.johnsyard.monashfriendfinder.fragments;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,11 +14,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.common.math.DoubleMath;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.johnsyard.monashfriendfinder.R;
 import com.johnsyard.monashfriendfinder.RestClient;
+import com.johnsyard.monashfriendfinder.dbmanager.DBManager;
 import com.mapbox.mapboxsdk.MapboxAccountManager;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
@@ -37,13 +41,30 @@ public class SearchMapFragment extends Fragment {
     //map attributes
     private MapboxMap mMapboxMap;
     private MapView mMapView;
-
-    //should be changed
-    private LatLng userPosition = new LatLng(-37.7749, 143.4194);
+    private DBManager dbManager;
+    private LatLng userPosition;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        dbManager = new DBManager(getActivity());
+        //get location from SQLite database
+        try
+        {
+            dbManager.open();
+        } catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        Cursor cursor = dbManager.selectUser("1");
+        cursor.moveToFirst();
+        String lat = cursor.getString(1);
+        String longi = cursor.getString(2);
+        dbManager.close();
+        //should be changed
+        userPosition = new LatLng(Double.parseDouble(lat), Double.parseDouble(longi));
+
         vMap = inflater.inflate(R.layout.fragment_friend_map, container, false);
         //to fix the mapbox error
         MapboxAccountManager.start(getActivity().getApplicationContext(), "BbVuA8V5P9aPDtmn");

@@ -4,6 +4,8 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.SQLException;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -20,10 +22,13 @@ import com.johnsyard.monashfriendfinder.RestClient;
 import com.johnsyard.monashfriendfinder.dbmanager.DBManager;
 import com.johnsyard.monashfriendfinder.widgets.ExpandAdapter;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by xuanzhang on 1/05/2017.
@@ -49,6 +54,7 @@ public class HomeFragment extends Fragment {
         tvTemp = (TextView) vHome.findViewById(R.id.tv_temperature);
         tvTime = (TextView) vHome.findViewById(R.id.tv_time);
         tvName = (TextView) vHome.findViewById(R.id.tv_hi);
+        dbManager = new DBManager(getActivity());
         //get location
         JsonObject location = initLocation();
         //insert info into database
@@ -57,8 +63,8 @@ public class HomeFragment extends Fragment {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        String latitude = location.get("latitude").toString();
-        String longitude = location.get("longitude").toString();
+        String latitude = location.get("latitude").getAsString();
+        String longitude = location.get("longitude").getAsString();
 
         dbManager.insertUser("1", latitude, longitude);
         dbManager.close();
@@ -133,16 +139,36 @@ public class HomeFragment extends Fragment {
     }
 
     /**
-     * Create user location randomly range is -35 +- 4 and 145 +- 4
+     * Create user location randomly
      * @return location
      */
     private JsonObject initLocation(){
         double delta = Math.random() * LAT_LONG_RANGE;
-        double latitude = BASE_LATITUDE + delta;
-        double longitude = BASE_LONGITUDE + delta;
+        final double latitude = BASE_LATITUDE + delta;
+        final double longitude = BASE_LONGITUDE + delta;
         JsonObject location = new JsonObject();
-        location.addProperty("latitude", latitude);
-        location.addProperty("longitude", longitude);
+        location.addProperty("latitude", String.valueOf(latitude));
+        location.addProperty("longitude", String.valueOf(longitude));
+
+        new AsyncTask<String, Void, Void>(){
+            @Override
+            protected Void doInBackground(String... strings) {
+                String address = RestClient.getAddress(strings[0], strings[1]);
+                JsonObject locationRecord = new JsonObject();
+                String myProfile = sp.getString("myProfile", null);
+                JsonObject profileJson = new JsonParser().parse(myProfile).getAsJsonObject();
+                locationRecord.add("studentId", profileJson);
+                locationRecord.addProperty("latitude", latitude);
+                locationRecord.addProperty("longitude", longitude);
+                locationRecord.addProperty("locationName", address);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String dateString = sdf.format(new Date());
+                locationRecord.addProperty("dateTime", dateString);
+                RestClient.createLocationRecord(locationRecord.toString());
+                return null;
+            }
+        }.execute(String.valueOf(latitude), String.valueOf(longitude));
         return location;
     }
 }

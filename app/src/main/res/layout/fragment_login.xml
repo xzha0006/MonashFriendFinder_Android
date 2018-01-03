@@ -51,6 +51,8 @@
         android:inputType="textPassword"
         android:layout_marginRight="20dp"/>
 
+
+
     <Button
         android:id="@+id/bt_login"
         android:layout_width="wrap_content"
@@ -58,7 +60,7 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/et_password"
         android:layout_marginRight="65dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="45dp"
         android:text="@string/bt_login" />
 
     <Button
@@ -70,4 +72,14 @@
         android:text="@string/bt_rigester"
         android:layout_alignBaseline="@+id/bt_login"
         android:layout_alignBottom="@+id/bt_login" />
+
+    <CheckBox
+        android:id="@+id/cb_skip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_alignLeft="@+id/bt_login"
+        android:layout_below="@+id/et_password"
+        android:text="Skip Login" />
+
 </RelativeLayout>

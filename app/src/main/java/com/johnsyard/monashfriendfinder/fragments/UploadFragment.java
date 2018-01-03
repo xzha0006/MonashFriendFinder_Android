@@ -5,15 +5,14 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.icu.util.Calendar;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Spinner;
@@ -21,22 +20,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.johnsyard.monashfriendfinder.R;
 import com.johnsyard.monashfriendfinder.RestClient;
 import com.johnsyard.monashfriendfinder.entities.Profile;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * This is the register fragment
+ * This is the upload fragment
  * Created by xuanzhang on 28/04/2017.
  */
 
-public class RegisterFragment extends Fragment {
+public class UploadFragment extends Fragment {
     private View vRegister;
     private Button btSetDate;
     private Button btSubmit;
@@ -50,6 +48,7 @@ public class RegisterFragment extends Fragment {
     private EditText etFirstName;
     private EditText etLastName;
     private TextView tvDateOfBirth;
+    private TextView tvStudentId;
     private RadioButton rbMale;
     private RadioButton rbFemale;
     private Spinner sCourse;
@@ -67,7 +66,7 @@ public class RegisterFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        vRegister = inflater.inflate(R.layout.fragment_subscription, container, false);
+        vRegister = inflater.inflate(R.layout.fragment_upload, container, false);
         btSetDate = (Button) vRegister.findViewById(R.id.bt_setdate);
         btSubmit = (Button) vRegister.findViewById(R.id.bt_submit);
         btCancel = (Button) vRegister.findViewById(R.id.bt_cancel);
@@ -91,7 +90,83 @@ public class RegisterFragment extends Fragment {
         etFavouriteMovie = (EditText) vRegister.findViewById(R.id.et_favorite_movie);
         sFavouriteUnit = (Spinner) vRegister.findViewById(R.id.s_favorite_unit);
         etCurrentJob = (EditText) vRegister.findViewById(R.id.et_job);
+        tvStudentId = (TextView) vRegister.findViewById(R.id.tv_id_value);
 
+        SharedPreferences sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        String myProfileString = sp.getString("myProfile", null);
+        JsonObject myProfileJson = new JsonParser().parse(myProfileString).getAsJsonObject();
+        final int studentId = myProfileJson.get("studentId").getAsInt();
+
+        //set the user profile
+        tvStudentId.setText(String.valueOf(studentId));
+        etEmail.setText(myProfileJson.get("email").getAsString());
+        etPassword.setText(myProfileJson.get("password").getAsString());
+        etPasswordAgain.setText(myProfileJson.get("password").getAsString());
+        etFirstName.setText(myProfileJson.get("firstName").getAsString());
+        etLastName.setText(myProfileJson.get("lastName").getAsString());
+        tvDateOfBirth.setText(myProfileJson.get("dateOfBirth").getAsString());
+        if (myProfileJson.get("gender").getAsString().equals("Male")){
+            rbMale.setChecked(true);
+            rbFemale.setChecked(false);
+        }else{
+            rbMale.setChecked(false);
+            rbFemale.setChecked(true);
+        }
+        etAddress.setText(myProfileJson.get("address").getAsString());
+        etSuburb.setText(myProfileJson.get("suburb").getAsString());
+        etFavouriteMovie.setText(myProfileJson.get("favouriteMovie").getAsString());
+        etCurrentJob.setText(myProfileJson.get("currentJob").getAsString());
+
+        String [] courseArray = getResources().getStringArray(R.array.course_array);
+        for (int i = 0; i < courseArray.length; i++){
+            if(myProfileJson.get("course").getAsString() ==  courseArray[i]){
+                sCourse.setSelection(i);
+            }
+        }
+
+        String [] studyModeArray = getResources().getStringArray(R.array.studymode_array);
+        for (int i = 0; i < studyModeArray.length; i++){
+            if(myProfileJson.get("studyMode").getAsString() ==  studyModeArray[i]){
+                sStudyMode.setSelection(i);
+            }
+        }
+
+        String [] nationArray = getResources().getStringArray(R.array.nation_array);
+        for (int i = 0; i < nationArray.length; i++){
+            if(myProfileJson.get("nationality").getAsString() ==  nationArray[i]){
+                sNationality.setSelection(i);
+            }
+        }
+
+        String [] languageArray = getResources().getStringArray(R.array.language_array);
+        for (int i = 0; i < languageArray.length; i++){
+            if(myProfileJson.get("nativeLanguage").getAsString() ==  languageArray[i]){
+                sNativeLanguage.setSelection(i);
+            }
+        }
+
+        String [] favoriteSportArray = getResources().getStringArray(R.array.favorite_sport_array);
+        for (int i = 0; i < favoriteSportArray.length; i++){
+            if(myProfileJson.get("favouriteSport").getAsString() ==  favoriteSportArray[i]){
+                sFavouriteSport.setSelection(i);
+            }
+        }
+
+        String [] favoriteUnitArray = getResources().getStringArray(R.array.favorite_unit_array);
+        for (int i = 0; i < favoriteUnitArray.length; i++){
+            if(myProfileJson.get("favouriteUnit").getAsString() ==  favoriteUnitArray[i]){
+                sFavouriteUnit.setSelection(i);
+            }
+        }
+
+
+        //
+        tvStudentId.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getActivity().getApplicationContext(), "Sorry, you can not change your student id.", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         //date picker for selecting date of birth
         btSetDate.setOnClickListener(new View.OnClickListener() {
@@ -197,32 +272,25 @@ public class RegisterFragment extends Fragment {
                 profile.setStudyMode(studyMode);
                 profile.setSubscriptionDatetime(subscriptionDatetime);
                 profile.setSuburb(suburb);
+                profile.setStudentId(studentId);
 
-                //store the profile in local
-//                SharedPreferences spMyProfile = getActivity().getSharedPreferences("myProfile", Context.MODE_PRIVATE);
-//                String sMyProfile = spMyProfile.getString("myProfile", null);
-//                String jsMyProfile = new Gson().toJson(profile);
-//
-//                SharedPreferences.Editor eMyProfile = spMyProfile.edit();
-//                eMyProfile.putString("myProfile", jsMyProfile);
-//                eMyProfile.apply();
                 new AsyncTask<String, Void, String>() {
                     @Override
                     protected void onPreExecute() {
-                        Toast.makeText(getActivity().getApplicationContext(), "Your profile is submitting...", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), "Your profile is uploading...", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     protected String doInBackground(String... strings) {
-                        RestClient.createProfile(strings[0]);
-                        return "Registered successfully!";
+                        RestClient.upload(strings[0]);
+                        return "Uploaded profile successfully!";
                     }
 
                     @Override
                     protected void onPostExecute(String response) {
                         Toast.makeText(getActivity().getApplicationContext(), response, Toast.LENGTH_LONG).show();
                         FragmentManager fragmentManager = getFragmentManager();
-                        fragmentManager.beginTransaction().replace(R.id.content_frame, new LoginFragment()).commit();
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, new HomeFragment()).commit();
                     }
                 }.execute(new Gson().toJson(profile));
             }
@@ -233,7 +301,7 @@ public class RegisterFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, new LoginFragment()).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, new HomeFragment()).commit();
             }
         });
 

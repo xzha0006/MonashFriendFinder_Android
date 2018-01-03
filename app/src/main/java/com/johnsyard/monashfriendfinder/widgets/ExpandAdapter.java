@@ -1,21 +1,30 @@
 package com.johnsyard.monashfriendfinder.widgets;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.JsonObject;
 import com.johnsyard.monashfriendfinder.R;
+import com.johnsyard.monashfriendfinder.RestClient;
+import com.johnsyard.monashfriendfinder.entities.MovieInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static android.R.attr.description;
 
 /**
  * This adapter is used for expanding listview with checkbox
@@ -59,7 +68,7 @@ public class ExpandAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, final ViewGroup parent) {
         ViewHolder holder = null;
         //initialise convertView
         if (convertView == null) {
@@ -99,7 +108,7 @@ public class ExpandAdapter extends BaseAdapter {
 
             @Override
             public void onClick(View view) {
-                Toast.makeText(context, "item is clicked", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(context, "item is clicked", Toast.LENGTH_SHORT).show();
                 //record the click position
                 int tag = (Integer) view.getTag();
                 if (tag == currentItem) { //click again
@@ -114,7 +123,7 @@ public class ExpandAdapter extends BaseAdapter {
         //click checkbox
         holder.cbItem.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Toast.makeText(context, "checkbox is clicked", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(context, "checkbox is clicked", Toast.LENGTH_SHORT).show();
                 if (isSelected.get(position)) {
                     isSelected.put(position, false);
                     setIsSelected(isSelected);
@@ -127,6 +136,47 @@ public class ExpandAdapter extends BaseAdapter {
         });
 
         holder.cbItem.setChecked(getIsSelected().get(position));
+        //set movie info
+        holder.tvMovie.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                View dialog = LayoutInflater.from(context).inflate(R.layout.dialog_movie, parent, false);
+                final ImageView imgMovie = (ImageView) dialog.findViewById(R.id.img_movie);
+                final TextView tvMovieInfo = (TextView) dialog.findViewById(R.id.tv_movie_info);
+                String favoriteMovie = ((TextView) view).getText().toString();
+                String movieName = favoriteMovie.substring(favoriteMovie.indexOf(":")+1).trim();
+                new AsyncTask<String, Void, MovieInfo>(){
+                    @Override
+                    protected MovieInfo doInBackground(String... strings) {
+                        MovieInfo movie = RestClient.getMovieInfo(strings[0]);
+                        return movie;
+                    }
+                    @Override
+                    protected void onPostExecute(MovieInfo movie) {
+                        String description = movie.getDescription() == null ? "" : movie.getDescription();
+                        Bitmap bitmap = movie.getImage() == null ? null : movie.getImage();
+                        if (description.length() > 0){
+                            tvMovieInfo.setText(description);
+                        }else{
+                            tvMovieInfo.setText("No information about this movie: " + ((TextView) view).getText().toString());
+                        }
+
+                        if(bitmap != null){
+                            imgMovie.setImageBitmap(bitmap);
+                        }
+
+                    }
+
+                }.execute(movieName);
+                builder.setTitle("Movie Info:");
+                builder.setView(dialog);
+                builder.setCancelable(true);
+                AlertDialog dialogAlert = builder.create();
+                dialogAlert.setCanceledOnTouchOutside(true);
+                dialogAlert.show();
+            }
+        });
         return convertView;
     }
 

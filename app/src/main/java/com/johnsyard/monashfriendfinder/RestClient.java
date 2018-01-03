@@ -8,11 +8,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.johnsyard.monashfriendfinder.entities.MovieInfo;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.PrintWriter;
+import java.io.SyncFailedException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -24,7 +26,8 @@ import java.util.Scanner;
  */
 
 public class RestClient {
-    private static final String BASE_URI = "http://100.103.124.90:8080/MonashFriendFinder/webresources/entities.";
+
+    private static final String BASE_URI = "http://49.127.156.172:8080/MonashFriendFinder/webresources/entities.";
     private static final String WEATHER_API = "http://api.openweathermap.org/data/2.5/weather?";
 
     public static void main(String[] args){
@@ -36,9 +39,9 @@ public class RestClient {
      * @param movie
      * @return
      */
-    public static JsonObject getMovieInfo(String movie) {
-        JsonObject result = new JsonObject();
-        result.addProperty("movie", movie);
+    public static MovieInfo getMovieInfo(String movie) {
+        movie = movie.replace(" ", "+");
+        MovieInfo result = new MovieInfo();
         HttpURLConnection conn = null;
         String url = "";
         String textResult = "";
@@ -59,12 +62,13 @@ public class RestClient {
             JsonObject response = new JsonParser().parse(textResult).getAsJsonObject();
             JsonArray items = response.get("items").getAsJsonArray();
             if (items.size() > 0){
-                String description = items.get(0).getAsJsonObject().get("snippet").toString();
                 JsonArray movieInfo = items.get(0).getAsJsonObject().get("pagemap").getAsJsonObject().get("movie").getAsJsonArray();
                 //get image url
-                String imgUrl = movieInfo.get(0).getAsJsonObject().get("image").toString();
-                result.addProperty("imgUrl", imgUrl);
-                result.addProperty("description", description);
+                String imgUrl = movieInfo.get(0).getAsJsonObject().get("image").getAsString();
+                String description = movieInfo.get(0).getAsJsonObject().get("description").getAsString();
+
+                result.setImage(getMovieImage(imgUrl));
+                result.setDescription(description);
             }
 //            Log.i("Info", new Integer(conn.getResponseCode()).toString());
         } catch (Exception e) {
@@ -80,7 +84,7 @@ public class RestClient {
      * @param imgUrl
      * @return
      */
-    public static Bitmap getMovieImage(String imgUrl) {
+    private static Bitmap getMovieImage(String imgUrl) {
         Bitmap bitmap = null;
         HttpURLConnection connImg = null;
         try {
@@ -95,6 +99,64 @@ public class RestClient {
         }
         return bitmap;
     }
+
+    /**
+     * This method is used for getting favorite units
+     */
+    public static JsonArray getFavoriteUnits() {
+        //initialise
+        JsonArray favoriteUnits = new JsonArray();
+        HttpURLConnection conn = null;
+        String textResult = "";
+        final String methodPath = "profile/favouriteUnitFrequency";
+        try {
+            //open the connection
+            conn = setConnection(BASE_URI + methodPath, "GET", false);
+            Scanner inStream = new Scanner(conn.getInputStream());
+            //read the input stream and store it as string
+            while (inStream.hasNextLine()) {
+                textResult += inStream.nextLine();
+            }
+            inStream.close();
+            favoriteUnits = new JsonParser().parse(textResult).getAsJsonArray();
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+        }
+        return favoriteUnits;
+    }
+
+    /**
+     * This method is used to get the nearest student.
+     * @return
+     */
+    public static JsonArray getNearestStudents(String id, String latitude, String longitude) {
+        //initialise
+        JsonArray nearestStudents = new JsonArray();
+        HttpURLConnection conn = null;
+        String textResult = "";
+        final String methodPath = "profile/favouriteUnitFrequency";
+        try {
+            //open the connection
+            conn = setConnection(BASE_URI + methodPath + id + "/" + latitude + "/" + longitude, "GET", false);
+            Scanner inStream = new Scanner(conn.getInputStream());
+            //read the input stream and store it as string
+            while (inStream.hasNextLine()) {
+                textResult += inStream.nextLine();
+            }
+            inStream.close();
+            nearestStudents = new JsonParser().parse(textResult).getAsJsonArray();
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+        }
+        return nearestStudents;
+    }
+
     /**
      * This method is used for deleting student
      * @param friendships
@@ -356,6 +418,57 @@ public class RestClient {
     }
 
     /**
+     * create a location record while logining.
+     * @param locationJson
+     */
+    public static void createLocationRecord(String locationJson) {
+        //initialise
+        HttpURLConnection conn = null;
+        final String methodPath = "location/";
+        try {
+            //open the connection
+            conn = setConnection(BASE_URI + methodPath, "POST", true);
+            conn.setFixedLengthStreamingMode(locationJson.getBytes().length);
+            //Send the POST out
+            PrintWriter out = new PrintWriter(conn.getOutputStream());
+            out.print(locationJson);
+            out.flush();
+            out.close();
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    /**
+     * This is used to upload profile
+     * @param newProfile
+     */
+    public static void upload(String newProfile) {
+        //initialise
+        HttpURLConnection conn = null;
+        final String methodPath = "profile/upload";
+        try {
+            //open the connection
+            conn = setConnection(BASE_URI + methodPath, "PUT", true);
+            conn.setFixedLengthStreamingMode(newProfile.getBytes().length);
+            //Send the POST out
+            PrintWriter out = new PrintWriter(conn.getOutputStream());
+            out.print(newProfile);
+            out.flush();
+            out.close();
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+
+    /**
      * This method is used for login checking
      */
     public static JsonObject loginCheck(String userName, String password){
@@ -399,6 +512,99 @@ public class RestClient {
             conn.disconnect();
         }
         return responseJson;
+    }
+
+    /**
+     * get geo info
+     */
+    public static String getAddress(String lat, String longi) {
+        //initialise
+        String addressInfo = "";
+        HttpURLConnection conn = null;
+        Scanner inStream = null;
+        String textResult = "";
+        final String methodPath = "https://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=" + lat + "," + longi + "&key=AIzaSyDBZb4pV22JXFIKpTiu1Dg9HwD8RqFVeXE";
+        try {
+            //open the connection
+            conn = setConnection(methodPath, "GET", false);
+            inStream = new Scanner(conn.getInputStream());
+            //read the input steream and store it as string
+            while (inStream.hasNextLine()) {
+                textResult += inStream.nextLine();
+            }
+            System.out.println(textResult);
+            JsonObject responseJson = new JsonParser().parse(textResult).getAsJsonObject();
+            addressInfo = responseJson.get("results").getAsJsonArray().get(0).getAsJsonObject().get("formatted_address").getAsString();
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+            inStream.close();
+        }
+        return addressInfo;
+    }
+
+    /**
+     * get location records from database
+     */
+    public static JsonArray getLocationRecords(String studentId) {
+        //initialise
+        JsonArray locations = new JsonArray();
+        HttpURLConnection conn = null;
+        Scanner inStream = null;
+        String textResult = "";
+        final String methodPath = "location/findByStudentId/" + studentId;
+        try {
+            //open the connection
+            conn = setConnection(BASE_URI + methodPath, "GET", false);
+            inStream = new Scanner(conn.getInputStream());
+            //read the input steream and store it as string
+            while (inStream.hasNextLine()) {
+                textResult += inStream.nextLine();
+            }
+            System.out.println(textResult);
+            locations = new JsonParser().parse(textResult).getAsJsonArray();
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+            inStream.close();
+        }
+        return locations;
+    }
+
+    /**
+     * get location frequency from database
+     */
+    public static JsonArray getLocationFrequency(String studentId, String start, String end) {
+        //initialise
+        JsonArray locationFrequency = new JsonArray();
+        start = start.replace(" ", "%20");
+        end = end.replace(" ", "%20");
+        HttpURLConnection conn = null;
+        Scanner inStream = null;
+        String textResult = "";
+        final String methodPath = "location/findLocationsByStudIdAndDatetime/"+studentId+"/"+start+"/" + end;
+        try {
+            //open the connection
+            conn = setConnection(BASE_URI + methodPath, "GET", false);
+            inStream = new Scanner(conn.getInputStream());
+            //read the input steream and store it as string
+            while (inStream.hasNextLine()) {
+                textResult += inStream.nextLine();
+            }
+            System.out.println(textResult);
+            locationFrequency = new JsonParser().parse(textResult).getAsJsonArray();
+//            Log.i("Info", new Integer(conn.getResponseCode()).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+            inStream.close();
+        }
+        return locationFrequency;
     }
 
     /**

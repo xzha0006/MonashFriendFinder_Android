@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -34,6 +35,7 @@ public class LoginFragment extends Fragment {
     private Button btRegister;
     private EditText etUserName;
     private EditText etPassword;
+    private CheckBox cbSkipLogin;
 
     @Nullable
     @Override
@@ -43,6 +45,7 @@ public class LoginFragment extends Fragment {
         btRegister = (Button) vLogin.findViewById(R.id.bt_register);
         etUserName = (EditText) vLogin.findViewById(R.id.et_user_name);
         etPassword = (EditText) vLogin.findViewById(R.id.et_password);
+        cbSkipLogin = (CheckBox) vLogin.findViewById(R.id.cb_skip);
 
         //login
         btLogin.setOnClickListener(new View.OnClickListener(){
@@ -80,6 +83,9 @@ public class LoginFragment extends Fragment {
                             SharedPreferences sp = getActivity().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
                             SharedPreferences.Editor spEdit = sp.edit();
                             spEdit.putString("myProfile", myProfile.toString());
+                            if (cbSkipLogin.isChecked()){
+                                spEdit.putString("skipLogin", "true");
+                            }
                             spEdit.apply();
                             //clear the data and go to home page
                             Toast.makeText(getActivity().getApplicationContext(), "Login Successfully!", Toast.LENGTH_SHORT).show();

@@ -8,6 +8,9 @@
         <item
             android:id="@+id/nav_friend"
             android:title="Friend" />
+        <item
+            android:id="@+id/nav_report"
+            android:title="Report" />
     </group>
 
     <item android:title="Settings">

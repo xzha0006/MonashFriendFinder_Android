@@ -2,6 +2,8 @@ package com.johnsyard.monashfriendfinder;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -18,7 +20,12 @@ import android.view.MenuItem;
 
 import com.johnsyard.monashfriendfinder.fragments.FriendFragment;
 import com.johnsyard.monashfriendfinder.fragments.HomeFragment;
+import com.johnsyard.monashfriendfinder.fragments.LoginFragment;
+import com.johnsyard.monashfriendfinder.fragments.ReportFragment;
 import com.johnsyard.monashfriendfinder.fragments.SearchFragment;
+import com.johnsyard.monashfriendfinder.fragments.UploadFragment;
+
+import net.hockeyapp.android.*;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -85,9 +92,18 @@ public class MainActivity extends AppCompatActivity
             nextFragment = new SearchFragment();
         } else if (id == R.id.nav_friend) {
             nextFragment = new FriendFragment();
+        } else if (id == R.id.nav_report) {
+            nextFragment = new ReportFragment();
         } else if (id == R.id.nav_update) {
-
+            nextFragment = new UploadFragment();
         } else if (id == R.id.nav_logout) {
+            SharedPreferences sp = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+            SharedPreferences.Editor spEdit = sp.edit();
+            spEdit.remove("skipLogin");
+            spEdit.apply();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            return true;
 
         } else if (id == R.id.nav_view) {
 

@@ -170,7 +170,7 @@ public class FriendFragment extends Fragment {
         if (friendsArray.size() != 0){
             //has matched results
             ArrayList<HashMap<String, String>> data = formatData(friendsArray);
-            adapter = new ExpandAdapter(getActivity().getApplicationContext(), data);
+            adapter = new ExpandAdapter(getActivity(), data);
             //show the data
             tvTitle.setText("Your Friends:");
             lvFriends.setAdapter(adapter);

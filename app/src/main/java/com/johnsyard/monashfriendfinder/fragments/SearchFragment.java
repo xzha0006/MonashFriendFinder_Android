@@ -105,7 +105,7 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
                             if (strangerArray != null && strangerArray.size() > 0){
                                 //if it has matched results
                                 ArrayList<HashMap<String, String>> data = formatData(strangerArray);
-                                adapter = new ExpandAdapter(getActivity().getApplicationContext(), data);
+                                adapter = new ExpandAdapter(getActivity(), data);
                                 //show the data and buttons
                                 lvResults.setAdapter(adapter);
                                 tvTitle.setVisibility(View.VISIBLE);
@@ -294,6 +294,5 @@ public class SearchFragment extends Fragment implements MultiSelectionSpinner.On
         for (int i = 0; i < KEYWORD_NUM - strings.size();i++){
             keywords += "/";
         }
-        Toast.makeText(getActivity().getApplicationContext(), keywords, Toast.LENGTH_LONG).show();
     }
 }
